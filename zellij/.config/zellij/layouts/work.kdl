@@ -1,0 +1,28 @@
+layout {
+    default_tab_template {
+        children
+        pane size=1 borderless=true {
+            plugin location="zellij:status-bar"
+        }
+    }
+
+    tab name="code" focus=true {
+        pane name="editor" command="hx" close_on_exit=true {
+            args "."
+        }
+    }
+
+    tab name="shell" {
+        pane name="shell"
+    }
+
+    tab name="agent" {
+        pane name="agent" command="zsh" close_on_exit=true {
+            args "-i" "-c" "x"
+        }
+    }
+
+    tab name="logs" {
+        pane name="logs"
+    }
+}

@@ -1,0 +1,75 @@
+theme = "ayu_mirage"
+
+[editor]
+# Enable the git diff gutter (shows + / - / ~ indicators in the margin)
+mouse = true
+scroll-lines = 3
+scrolloff = 5
+true-color = true
+line-number = "relative"
+rulers = [80, 120]
+gutters = ["diff", "diagnostics", "line-numbers", "spacer"]
+shell = ["zsh", "-c"]
+bufferline = "always"
+end-of-line-diagnostics = "hint"
+
+[editor.indent-guides]
+render = true
+character = "╎"
+
+[editor.cursor-shape]
+insert = "bar"
+normal = "block"
+select = "underline"
+
+[editor.inline-diagnostics]
+cursor-line = "error"
+
+# Statusline configuration to show Git branch and file modification status
+[editor.statusline]
+#left = ["mode", "spinner", "version-control"]
+left = ["mode", "spacer", "file-name", "file-modification-indicator"]
+center = ["diagnostics"]
+right = ["version-control", "spacer", "position", "file-type"]
+separator = "|"
+diagnostics = ["error", "warning"]
+workspace-diagnostics = ["error", "warning"]
+
+mode.normal = "NOR"
+mode.insert = "INS"
+mode.select = "SEL"
+
+# Optional: Enable soft-wrap if you prefer it over hard line breaks
+[editor.soft-wrap]
+enable = true
+
+[keys.insert]
+j = { k = "normal_mode" }
+
+[keys.normal]
+ret = ":write"
+C-q = ":bc"
+"," = { "," = "keep_primary_selection", q = ":bc", w = ":w", x = ":x", r = ":rla" }
+# C-h = ":buffer-previous"
+# C-l = ":buffer-next"
+# Spawn LazyGit / Yazi as on-demand floating panes. Close with `q` (NOT Ctrl-g/e),
+# otherwise pressing the key twice will stack two instances.
+C-g = ":sh zellij run --floating --close-on-exit --name lazygit --width 95%% --height 95%% --x 2%% --y 2%% -- lazygit"
+C-e = ":sh zellij run --floating --close-on-exit --name yazi    --width 95%% --height 95%% --x 2%% --y 2%% -- yazi"
+C-b = ":echo %sh{git blame -L %{cursor_line},+1 -c %{buffer_name}}"
+"C-," = ':! echo -e "\e]52;;$(echo %{buffer_name} | base64)\007" > /dev/tty'
+C-j = ["extend_to_line_bounds", "delete_selection", "paste_after"]
+C-k = [
+  "extend_to_line_bounds",
+  "delete_selection",
+  "move_line_up",
+  "paste_before",
+]
+
+[keys.normal.space.z]
+a = ":sh bazel test //..."
+z = ":sh bazel run //:gazelle && touch .gopls-reload"
+b = ":sh bazel build //%sh{dirname %{buffer_name}}:all"
+r = ":sh bazel run //%sh{dirname %{buffer_name}}:all"
+t = ':sh bazel test %sh{ d=$(dirname %{buffer_name}); b=$(basename "$d"); echo "//$d:${b}_test"; } 2>&1 | tee /tmp/hx-bazel-test.log'
+l = ':open /tmp/hx-bazel-test.log'

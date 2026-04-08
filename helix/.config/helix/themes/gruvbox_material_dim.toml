@@ -1,0 +1,10 @@
+inherits = "gruvbox-material"
+
+# Make comments more muted
+"comment" = "#7c6f64"
+"comment.block" = "#7c6f64"
+"comment.block.documentation" = "#928374"
+
+# Darker, less-in-your-face selection colors
+"ui.selection" = { bg = "#3c3836" }
+"ui.selection.primary" = { bg = "#504945" }

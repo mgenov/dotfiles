@@ -1,0 +1,8 @@
+.DS_Store
+*.swp
+
+# lazygit runtime state
+lazygit/Library/Application Support/lazygit/state.yml
+
+# yazi runtime
+yazi/.config/yazi/cache/

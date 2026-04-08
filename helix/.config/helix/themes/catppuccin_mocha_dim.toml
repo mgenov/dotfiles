@@ -1,0 +1,10 @@
+inherits = "catppuccin_mocha"
+
+# Make comments more muted
+"comment" = "#7f849c"
+"comment.block" = "#7f849c"
+"comment.block.documentation" = "#7f849c"
+
+# So selections aren’t bright/white-ish slabs
+"ui.selection" = { bg = "#313244" }
+"ui.selection.primary" = { bg = "#45475a" }

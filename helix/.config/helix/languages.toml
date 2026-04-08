@@ -1,0 +1,73 @@
+[[language]]
+name = "toml"
+formatter = { command = "taplo", args = ["fmt", "-"] }
+auto-format = true
+
+[language-server.taplo]
+config = {}
+
+[language-server.gopls]
+command = "gopls"
+args = ["serve"]
+
+[language-server.harper-ls]
+command = "harper-ls"
+args = ["--stdio"]
+
+[language-server.harper-ls.config.harper-ls.linters]
+SpellCheck = false
+SentenceCapitalization = false
+
+[language-server.tailwindcss-ls]
+command = "tailwindcss-language-server"
+args = ["--stdio"]
+config = { userLanguages = { "*.tsx" = "html", "*.jsx" = "html" } }
+
+# Hook gopls up for Go and auto-format (gofumpt via gopls)
+[[language]]
+name = "go"
+language-servers = ["gopls"]
+auto-format = true
+formatter = { command = "goimports" }
+
+[[language]]
+name = "protobuf"
+language-servers = ["protols"]
+auto-format = true
+
+
+[[language]]
+name = "markdown"
+language-servers = ["harper-ls"]
+
+# Configure the "git-commit" language type
+[[language]]
+name = "git-commit"
+# Add rulers to guide your writing (50 chars for title, 72 for body)
+rulers = [50, 72]
+# specific text-width for reflowing text (commands like :reflow)
+text-width = 72
+language-servers = ["harper-ls"]
+
+# You can also customize indentation for git config files specifically
+[[language]]
+name = "git-config"
+indent = { tab-width = 4, unit = "\t" }
+
+[[language]]
+name = "javascript"
+auto-format = true
+
+[[language]]
+name = "typescript"
+auto-format = true
+
+[[language]]
+name = "tsx"
+auto-format = true
+language-servers = ["tailwindcss-ls", "typescript-language-server"]
+
+[[language]]
+name = "jsx"
+auto-format = true
+language-servers = ["tailwindcss-ls", "typescript-language-server"]

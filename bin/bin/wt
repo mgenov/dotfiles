@@ -1,0 +1,52 @@
+#!/usr/bin/env zsh
+# wt — attach or create a Zellij session for a monorepo worktree.
+#
+# Usage:
+#   wt              # interactive picker
+#   wt main         # → ~/workspaces/idea/monorepo
+#   wt a            # → ~/workspaces/idea/monorepo-agent-a
+#   wt b            # → monorepo-agent-b
+#   wt c            # → monorepo-agent-c
+
+set -e
+
+export PATH="$HOME/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+idea="$HOME/workspaces/idea"
+infra="$HOME/workspaces/infra"
+
+case "$1" in
+  ""|-h|--help)
+    echo "Usage: wt <main|a|b|c|fleet|cloud>"
+    echo "  main  → $idea/monorepo"
+    echo "  a     → $idea/monorepo-agent-a"
+    echo "  b     → $idea/monorepo-agent-b"
+    echo "  c     → $idea/monorepo-agent-c"
+    echo "  fleet → $infra/fleet-infra"
+    echo "  cloud → $infra/cloud-infra"
+    exit 0
+    ;;
+  main)  name="main";    dir="$idea/monorepo" ;;
+  a)     name="agent-a"; dir="$idea/monorepo-agent-a" ;;
+  b)     name="agent-b"; dir="$idea/monorepo-agent-b" ;;
+  c)     name="agent-c"; dir="$idea/monorepo-agent-c" ;;
+  fleet) name="fleet";   dir="$infra/fleet-infra" ;;
+  cloud) name="cloud";   dir="$infra/cloud-infra" ;;
+  *)     echo "unknown worktree: $1"; exit 1 ;;
+esac
+
+if [[ ! -d "$dir" ]]; then
+  echo "no such directory: $dir"
+  exit 1
+fi
+
+cd "$dir"
+
+# If a session with this name already exists (active or exited), attach to it.
+# Otherwise create a fresh one with the work layout.
+# `zellij ls -s` prints just session names, one per line, no ANSI codes.
+if zellij list-sessions -s 2>/dev/null | grep -Fxq "$name"; then
+  exec zellij attach "$name"
+else
+  exec zellij --session "$name" --new-session-with-layout work
+fi

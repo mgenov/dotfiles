@@ -1,0 +1,14 @@
+[opener]
+edit = [
+  { run = 'zjctl pane focus --pane title:editor && zjctl pane send --pane title:editor --enter=false -- ":open $1" && zellij action write 13 && zjctl pane close --pane title:yazi', block = false, desc = "Open in Helix" },
+]
+
+[open]
+rules = [
+  { mime = "text/*",          use = "edit" },
+  { mime = "application/json", use = "edit" },
+  { mime = "application/x-yaml", use = "edit" },
+  { mime = "application/toml", use = "edit" },
+  { name = "*",               use = "edit" },
+  { name = "*.*",             use = "edit" },
+]

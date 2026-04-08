@@ -1,0 +1,39 @@
+default_shell "zsh"
+pane_frames false
+default_layout "compact"
+copy_command "pbcopy"
+
+// Let Helix keep Ctrl-h/j/k/l, etc.
+default_mode "locked"
+
+// Free Ctrl-g for Helix (LazyGit). Use Alt-z to unlock Zellij instead.
+keybinds {
+    locked {
+        unbind "Ctrl g"
+        bind "Alt z" { SwitchToMode "Normal"; }
+
+        // Tab navigation without leaving locked mode
+        bind "Alt h" { GoToPreviousTab; }
+        bind "Alt l" { GoToNextTab; }
+        bind "Alt 1" { GoToTab 1; }
+        bind "Alt 2" { GoToTab 2; }
+        bind "Alt 3" { GoToTab 3; }
+        bind "Alt 4" { GoToTab 4; }
+        bind "Alt 5" { GoToTab 5; }
+
+        // Pane navigation and floating toggle
+        bind "Alt [" { MoveFocusOrTab "Left"; }
+        bind "Alt ]" { MoveFocusOrTab "Right"; }
+        bind "Alt f" { ToggleFloatingPanes; }
+    }
+    normal {
+        bind "Alt z" { SwitchToMode "Locked"; }
+    }
+}
+
+ui {
+  pane_frames {
+      rounded_corners true
+      hide_session_name true
+  }
+}
