@@ -1,5 +1,10 @@
 .DS_Store
 *.swp
+*.bak
+*.bak.[0-9]*
+
+# zellij plugin binaries (re-fetched via `zjctl install --load`)
+zellij/.config/zellij/plugins/*.wasm
 
 # lazygit runtime state
 lazygit/Library/Application Support/lazygit/state.yml
