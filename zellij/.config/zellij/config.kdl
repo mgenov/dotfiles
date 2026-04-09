@@ -21,10 +21,26 @@ keybinds {
         bind "Alt 4" { GoToTab 4; }
         bind "Alt 5" { GoToTab 5; }
 
-        // Pane navigation and floating toggle
+        // Pane navigation
         bind "Alt [" { MoveFocusOrTab "Left"; }
         bind "Alt ]" { MoveFocusOrTab "Right"; }
+        bind "Alt Left"  { MoveFocus "Left"; }
+        bind "Alt Right" { MoveFocus "Right"; }
+        bind "Alt Up"    { MoveFocus "Up"; }
+        bind "Alt Down"  { MoveFocus "Down"; }
         bind "Alt f" { ToggleFloatingPanes; }
+
+        // Pane management
+        bind "Alt n" { NewPane "Right"; }
+        bind "Alt N" { NewPane "Down"; }
+        bind "Alt x" { CloseFocus; }
+        bind "Alt =" { ToggleFocusFullscreen; }
+
+        // Tab management
+        bind "Alt t" { NewTab; }
+        bind "Alt w" { CloseTab; }
+        bind "Alt ," { MoveTab "Left"; }
+        bind "Alt ." { MoveTab "Right"; }
     }
     normal {
         bind "Alt z" { SwitchToMode "Locked"; }
