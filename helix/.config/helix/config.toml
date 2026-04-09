@@ -55,7 +55,7 @@ C-q = ":bc"
 # Spawn LazyGit / Yazi as on-demand floating panes. Close with `q` (NOT Ctrl-g/e),
 # otherwise pressing the key twice will stack two instances.
 C-g = ":sh zellij run --floating --close-on-exit --name lazygit --width 95%% --height 95%% --x 2%% --y 2%% -- lazygit"
-C-e = ":sh zellij run --floating --close-on-exit --name yazi    --width 95%% --height 95%% --x 2%% --y 2%% -- yazi"
+C-e = ":sh zellij run --floating --close-on-exit --name yazi    --width 95%% --height 95%% --x 2%% --y 2%% -- sh -c 'yazi \"$(dirname \"%{buffer_name}\")\"'"
 C-b = ":echo %sh{git blame -L %{cursor_line},+1 -c %{buffer_name}}"
 "C-," = ':! echo -e "\e]52;;$(echo %{buffer_name} | base64)\007" > /dev/tty'
 C-j = ["extend_to_line_bounds", "delete_selection", "paste_after"]
