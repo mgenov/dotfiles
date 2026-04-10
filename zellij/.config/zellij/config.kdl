@@ -48,7 +48,7 @@ keybinds {
         bind "Alt s" {
             LaunchOrFocusPlugin "zellij:session-manager" {
                 floating true
-                move_to_focused_tab false
+                move_to_focused_tab true
             };
         }
 
@@ -68,7 +68,7 @@ keybinds {
         bind "Alt s" {
             LaunchOrFocusPlugin "zellij:session-manager" {
                 floating true
-                move_to_focused_tab false
+                move_to_focused_tab true
             };
         }
     }
