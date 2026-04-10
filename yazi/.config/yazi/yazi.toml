@@ -1,6 +1,6 @@
 [opener]
 edit = [
-  { run = 'zjctl pane focus --pane title:editor && zjctl pane send --pane title:editor --enter=false -- ":open $1" && zellij action write 13 && zjctl pane close --pane title:yazi', block = false, desc = "Open in Helix" },
+  { run = 'zjctl pane focus --pane cmd:hx && zjctl pane send --pane cmd:hx --enter=false -- ":open $1" && zellij action write 13 && zjctl pane close --pane cmd:yazi', block = false, desc = "Open in Helix" },
 ]
 
 [open]

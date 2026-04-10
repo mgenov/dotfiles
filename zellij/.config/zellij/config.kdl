@@ -48,7 +48,7 @@ keybinds {
         bind "Alt s" {
             LaunchOrFocusPlugin "zellij:session-manager" {
                 floating true
-                move_to_focused_tab true
+                move_to_focused_tab false
             };
         }
 
@@ -60,6 +60,17 @@ keybinds {
     }
     normal {
         bind "Alt z" { SwitchToMode "Locked"; }
+        // Mirror critical locked-mode bindings so they work even if
+        // session manager or other actions leave us in normal mode.
+        bind "Alt h" { GoToPreviousTab; }
+        bind "Alt l" { GoToNextTab; }
+        bind "Alt f" { ToggleFloatingPanes; }
+        bind "Alt s" {
+            LaunchOrFocusPlugin "zellij:session-manager" {
+                floating true
+                move_to_focused_tab false
+            };
+        }
     }
 }
 

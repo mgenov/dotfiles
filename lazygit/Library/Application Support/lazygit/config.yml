@@ -9,17 +9,6 @@ git:
   pagers:
     - colorArg: always
       pager: delta --paging=never
-keybinding:
-  universal:
-    edit: '<c-e>'
-customCommands:
-  - key: 'e'
-    context: 'files'
-    description: 'Open file in Helix (via Zellij)'
-    command: 'zjctl pane focus --pane title:editor && zjctl pane send --pane title:editor --enter=false -- ":open {{.SelectedFile.Name}}" && zellij action write 13 && zjctl pane close --pane title:lazygit'
-    output: log
-  - key: 'e'
-    context: 'commitFiles'
-    description: 'Open file in Helix (via Zellij)'
-    command: 'zjctl pane focus --pane title:editor && zjctl pane send --pane title:editor --enter=false -- ":open {{.SelectedCommitFile.Name}}" && zellij action write 13 && zjctl pane close --pane title:lazygit'
-    output: log
+os:
+  edit: "echo {{filename}} > /tmp/lazygit-path; kill -9 $PPID"
+  editAtLine: "echo {{filename}}:{{line}} > /tmp/lazygit-path; kill -9 $PPID"
