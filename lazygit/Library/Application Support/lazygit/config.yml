@@ -1,5 +1,10 @@
 gui:
   promptToReturnFromSubprocess: false
+  theme:
+    selectedLineBgColor:
+      - '#3d4f6b'
+    selectedRangeBgColor:
+      - '#3d4f6b'
 git:
   pagers:
     - colorArg: always

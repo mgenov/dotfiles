@@ -2,6 +2,8 @@ default_shell "zsh"
 pane_frames false
 default_layout "compact"
 copy_command "pbcopy"
+scroll_buffer_size 100000
+scrollback_editor "/Users/mgenov/.cargo/bin/hx"
 
 // Let Helix keep Ctrl-h/j/k/l, etc.
 default_mode "locked"
@@ -35,6 +37,20 @@ keybinds {
         bind "Alt N" { NewPane "Down"; }
         bind "Alt x" { CloseFocus; }
         bind "Alt =" { ToggleFocusFullscreen; }
+
+        // Scrolling (within the focused pane's scrollback)
+        bind "Alt PageUp"   { PageScrollUp; }
+        bind "Alt PageDown" { PageScrollDown; }
+        bind "Alt u"        { HalfPageScrollUp; }
+        bind "Alt d"        { HalfPageScrollDown; }
+
+        // Session manager (switch between worktree sessions)
+        bind "Alt s" {
+            LaunchOrFocusPlugin "zellij:session-manager" {
+                floating true
+                move_to_focused_tab true
+            };
+        }
 
         // Tab management
         bind "Alt t" { NewTab; }

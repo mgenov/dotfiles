@@ -1,52 +1,119 @@
 #!/usr/bin/env zsh
-# wt — attach or create a Zellij session for a monorepo worktree.
+# wt — attach or create a Zellij session for a worktree.
 #
 # Usage:
-#   wt              # interactive picker
-#   wt main         # → ~/workspaces/idea/monorepo
-#   wt a            # → ~/workspaces/idea/monorepo-agent-a
-#   wt b            # → monorepo-agent-b
-#   wt c            # → monorepo-agent-c
+#   wt              # interactive fzf picker
+#   wt <name>       # attach or create session
+#   wt ls           # list active sessions
+#   wt kill <name>  # kill a session
+#   wt kill-all     # kill all sessions
 
 set -e
 
 export PATH="$HOME/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
-idea="$HOME/workspaces/idea"
-infra="$HOME/workspaces/infra"
+# ── Worktree registry ──────────────────────────────────────────────
+# Add new entries here: name → directory
+typeset -A worktrees
+worktrees=(
+  main    "$HOME/workspaces/idea/monorepo"
+  a       "$HOME/workspaces/idea/monorepo-agent-a"
+  b       "$HOME/workspaces/idea/monorepo-agent-b"
+  c       "$HOME/workspaces/idea/monorepo-agent-c/politis/client/mobile"
+  fleet   "$HOME/workspaces/infra/fleet-infra"
+  cloud   "$HOME/workspaces/infra/cloud-infra"
+)
 
+# Session name: use the key directly (short, unique)
+typeset -A session_names
+session_names=(
+  main  "main"
+  a     "agent-a"
+  b     "agent-b"
+  c     "agent-c"
+  fleet "fleet"
+  cloud "cloud"
+)
+
+# ── Helpers ────────────────────────────────────────────────────────
+_wt_list_entries() {
+  for key in ${(ko)worktrees}; do
+    printf "%-8s → %s\n" "$key" "${worktrees[$key]}"
+  done
+}
+
+_wt_attach_or_create() {
+  local key="$1"
+  local dir="${worktrees[$key]}"
+  local name="${session_names[$key]}"
+
+  if [[ -z "$dir" ]]; then
+    echo "unknown worktree: $key"
+    echo ""
+    _wt_list_entries
+    exit 1
+  fi
+
+  if [[ ! -d "$dir" ]]; then
+    echo "no such directory: $dir"
+    exit 1
+  fi
+
+  cd "$dir"
+
+  if zellij list-sessions -s 2>/dev/null | grep -Fxq "$name"; then
+    exec zellij attach "$name" --force-run-commands
+  else
+    exec zellij --session "$name" --new-session-with-layout work
+  fi
+}
+
+# ── Main ───────────────────────────────────────────────────────────
 case "$1" in
-  ""|-h|--help)
-    echo "Usage: wt <main|a|b|c|fleet|cloud>"
-    echo "  main  → $idea/monorepo"
-    echo "  a     → $idea/monorepo-agent-a"
-    echo "  b     → $idea/monorepo-agent-b"
-    echo "  c     → $idea/monorepo-agent-c"
-    echo "  fleet → $infra/fleet-infra"
-    echo "  cloud → $infra/cloud-infra"
-    exit 0
+  ls)
+    echo "Active sessions:"
+    zellij list-sessions 2>/dev/null || echo "  (none)"
+    echo ""
+    echo "Registered worktrees:"
+    _wt_list_entries
     ;;
-  main)  name="main";    dir="$idea/monorepo" ;;
-  a)     name="agent-a"; dir="$idea/monorepo-agent-a" ;;
-  b)     name="agent-b"; dir="$idea/monorepo-agent-b" ;;
-  c)     name="agent-c"; dir="$idea/monorepo-agent-c" ;;
-  fleet) name="fleet";   dir="$infra/fleet-infra" ;;
-  cloud) name="cloud";   dir="$infra/cloud-infra" ;;
-  *)     echo "unknown worktree: $1"; exit 1 ;;
+
+  kill)
+    if [[ -z "$2" ]]; then
+      echo "Usage: wt kill <name>"
+      exit 1
+    fi
+    local name="${session_names[$2]:-$2}"
+    zellij kill-session "$name" 2>&1 && echo "killed: $name" || echo "no session: $name"
+    ;;
+
+  kill-all)
+    zellij delete-all-sessions --force --yes 2>&1
+    echo "all sessions killed"
+    ;;
+
+  -h|--help)
+    echo "Usage: wt [<name>|ls|kill <name>|kill-all]"
+    echo ""
+    _wt_list_entries
+    ;;
+
+  "")
+    # Interactive picker via fzf
+    if ! command -v fzf &>/dev/null; then
+      echo "Usage: wt <name>"
+      echo ""
+      _wt_list_entries
+      exit 0
+    fi
+
+    local pick
+    pick=$(_wt_list_entries | fzf --height=12 --reverse --prompt="worktree> " | awk '{print $1}')
+    [[ -z "$pick" ]] && exit 0
+    _wt_attach_or_create "$pick"
+    ;;
+
+  *)
+    _wt_attach_or_create "$1"
+    ;;
 esac
-
-if [[ ! -d "$dir" ]]; then
-  echo "no such directory: $dir"
-  exit 1
-fi
-
-cd "$dir"
-
-# If a session with this name already exists (active or exited), attach to it.
-# Otherwise create a fresh one with the work layout.
-# `zellij ls -s` prints just session names, one per line, no ANSI codes.
-if zellij list-sessions -s 2>/dev/null | grep -Fxq "$name"; then
-  exec zellij attach "$name"
-else
-  exec zellij --session "$name" --new-session-with-layout work
-fi

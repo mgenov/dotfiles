@@ -1,0 +1,24 @@
+#compdef wt
+# Zsh completion for wt (worktree session launcher)
+
+_wt() {
+  local -a subcommands worktree_names
+
+  subcommands=(
+    'ls:list active sessions and registered worktrees'
+    'kill:kill a session by name'
+    'kill-all:kill all sessions'
+  )
+
+  worktree_names=(main a b c fleet cloud)
+
+  if (( CURRENT == 2 )); then
+    _alternative \
+      'worktrees:worktree:compadd -a worktree_names' \
+      'subcommands:subcommand:_describe "subcommand" subcommands'
+  elif (( CURRENT == 3 )) && [[ "${words[2]}" == "kill" ]]; then
+    compadd -a worktree_names
+  fi
+}
+
+_wt "$@"
