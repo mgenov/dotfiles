@@ -19,7 +19,7 @@ worktrees=(
   main    "$HOME/workspaces/idea/monorepo"
   a       "$HOME/workspaces/idea/monorepo-agent-a"
   b       "$HOME/workspaces/idea/monorepo-agent-b"
-  c       "$HOME/workspaces/idea/monorepo-agent-c/politis/client/mobile"
+  mobile  "$HOME/workspaces/idea/monorepo-agent-c/politis/client/mobile"
   fleet   "$HOME/workspaces/infra/fleet-infra"
   cloud   "$HOME/workspaces/infra/cloud-infra"
 )
@@ -30,7 +30,7 @@ session_names=(
   main  "main"
   a     "agent-a"
   b     "agent-b"
-  c     "agent-c"
+  mobile "agent-c"
   fleet "fleet"
   cloud "cloud"
 )
@@ -38,6 +38,7 @@ session_names=(
 # Layout per worktree (default: work)
 typeset -A layouts
 layouts=(
+  mobile "mobile"
   fleet "infra"
   cloud "infra"
 )

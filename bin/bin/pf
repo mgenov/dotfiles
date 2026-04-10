@@ -1,0 +1,86 @@
+#!/usr/bin/env zsh
+# pf — open kubectl port-forward panes in the current Zellij tab.
+#
+# Usage:
+#   pf svc/billing:8080                          # default namespace
+#   pf db/svc/cockroachdb-public:26257            # namespace "db"
+#   pf db/svc/cockroachdb:26257 billing/svc/api:8080 svc/redis:6379
+#
+# Syntax per target:
+#   [namespace/]resource/name:localPort[:remotePort]
+#
+# If the target has 3+ path segments before the port, the first is the namespace.
+# Global flags:
+#   -c <context>     kubectl context (applies to all)
+#
+# Layout:
+#   Left:  shell pane for psql, cockroach sql, curl, etc.
+#   Right: port-forward panes stacked vertically.
+
+set -e
+
+export PATH="$HOME/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+# Parse global flags
+local global_flags=""
+while [[ "$1" == -* ]]; do
+  case "$1" in
+    -c) global_flags="$global_flags --context $2"; shift 2 ;;
+    *)  echo "Unknown flag: $1"; exit 1 ;;
+  esac
+done
+
+if [[ $# -eq 0 ]]; then
+  echo "Usage: pf [-c context] <[namespace/]resource/name:port> [...]"
+  echo ""
+  echo "Examples:"
+  echo "  pf svc/billing:8080"
+  echo "  pf db/svc/cockroachdb-public:26257"
+  echo "  pf db/svc/cockroachdb:26257 billing/svc/api:8080 svc/redis:6379"
+  echo "  pf -c staging db/svc/postgres:5432"
+  exit 0
+fi
+
+# Parse a target into namespace flags + kubectl resource + port
+# Input:  db/svc/cockroachdb-public:26257
+# Output: --namespace db svc/cockroachdb-public 26257
+_pf_parse() {
+  local target="$1"
+  local resource_port="${target}"
+  local ns_flag=""
+
+  # Split off the port (everything after first :)
+  local resource="${resource_port%%:*}"
+  local port="${resource_port#*:}"
+
+  # Count path segments in resource
+  local segments=(${(s:/:)resource})
+  if [[ ${#segments} -ge 3 ]]; then
+    # First segment is namespace
+    ns_flag="--namespace ${segments[1]}"
+    resource="${segments[2]}/${segments[3]}"
+  fi
+
+  echo "$ns_flag $resource ${port/:/ }"
+}
+
+# Create a new tab — initial pane becomes the shell (left side)
+zellij action new-tab --name "pf"
+
+# First port-forward: split right (creates the right column)
+zellij action new-pane --direction right
+local parsed="$(_pf_parse "$1")"
+zellij action write-chars "kubectl port-forward$global_flags $parsed"
+zellij action write 13
+shift
+
+# Remaining port-forwards: stack downward in the right column
+for target in "$@"; do
+  zellij action new-pane --direction down
+  parsed="$(_pf_parse "$target")"
+  zellij action write-chars "kubectl port-forward$global_flags $parsed"
+  zellij action write 13
+done
+
+# Focus back to the shell pane (left side)
+zellij action move-focus left
