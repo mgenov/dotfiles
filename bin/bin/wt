@@ -35,6 +35,13 @@ session_names=(
   cloud "cloud"
 )
 
+# Layout per worktree (default: work)
+typeset -A layouts
+layouts=(
+  fleet "infra"
+  cloud "infra"
+)
+
 # ── Helpers ────────────────────────────────────────────────────────
 _wt_list_entries() {
   for key in ${(ko)worktrees}; do
@@ -61,10 +68,12 @@ _wt_attach_or_create() {
 
   cd "$dir"
 
+  local layout="${layouts[$key]:-work}"
+
   if zellij list-sessions -s 2>/dev/null | grep -Fxq "$name"; then
     exec zellij attach "$name" --force-run-commands
   else
-    exec zellij --session "$name" --new-session-with-layout work
+    exec zellij --session "$name" --new-session-with-layout "$layout"
   fi
 }
 
