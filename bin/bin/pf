@@ -61,7 +61,7 @@ _pf_parse() {
     resource="${segments[2]}/${segments[3]}"
   fi
 
-  echo "$ns_flag $resource ${port/:/ }"
+  echo "$ns_flag $resource $port"
 }
 
 # Create a new tab — initial pane becomes the shell (left side)
