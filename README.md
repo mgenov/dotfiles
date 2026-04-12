@@ -8,6 +8,7 @@ Each top-level directory is a stow package. Its contents mirror the target paths
 
 | Package   | Target                                                |
 | --------- | ----------------------------------------------------- |
+| `alacritty`| `~/.config/alacritty/`                               |
 | `helix`   | `~/.config/helix/`                                    |
 | `zellij`  | `~/.config/zellij/`                                   |
 | `yazi`    | `~/.config/yazi/`                                     |
@@ -18,14 +19,14 @@ Each top-level directory is a stow package. Its contents mirror the target paths
 
 ```sh
 # 1. install prerequisites
-brew install stow helix zellij yazi lazygit git-delta
+brew install stow alacritty helix zellij yazi lazygit git-delta
 
 # 2. clone this repo
 git clone <REMOTE_URL> ~/dotfiles
 cd ~/dotfiles
 
 # 3. stow everything (most packages target $HOME via .config)
-stow helix zellij yazi bin
+stow alacritty helix zellij yazi bin
 
 # 4. lazygit lives outside ~/.config; needs an explicit target
 stow --target="$HOME" lazygit
@@ -33,6 +34,7 @@ stow --target="$HOME" lazygit
 
 ## Stack overview
 
+- **Alacritty** — GPU-accelerated terminal emulator
 - **Helix** — modal editor
 - **Zellij** — terminal multiplexer; `wt <name>` (in `bin/`) launches per-worktree sessions with editor / shell / agent / logs tabs
 - **Yazi** — file manager, opens files in the running Helix pane via `zjctl`
@@ -50,6 +52,6 @@ stow --target="$HOME" lazygit
 
 ```sh
 cd ~/dotfiles
-stow -D helix zellij yazi bin
+stow -D alacritty helix zellij yazi bin
 stow -D --target="$HOME" lazygit
 ```
