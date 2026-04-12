@@ -1,0 +1,53 @@
+[general]
+# import = ["~/.config/alacritty/themes/ayu_mirage_helix.toml"]
+import = ["~/.config/alacritty/themes/themes/dracula.toml"]
+# import = ["~/.config/alacritty/themes/themes/rose_pine.toml"]
+
+[window]
+option_as_alt = "Both"
+decorations = "none"
+startup_mode = "Maximized"
+
+[scrolling]
+history = 100000
+
+[mouse]
+hide_when_typing = true
+
+[font]
+size = 13
+
+[font.normal]
+family = "JetBrains Mono"
+style = "Regular"
+
+[font.bold]
+family = "JetBrains Mono"
+style = "Bold"
+
+[font.italic]
+family = "JetBrains Mono"
+style = "Italic"
+
+# ctrl+n = spawn new window
+[[keyboard.bindings]]
+key = "N"
+mods = "Control"
+action = "SpawnNewInstance"
+
+# ctrl+s passthrough (send raw ^S)
+[[keyboard.bindings]]
+key = "S"
+mods = "Control"
+chars = "\u0013"
+
+# cmd+left/right = select prev/next tab (if using native tabbing)
+[[keyboard.bindings]]
+key = "Left"
+mods = "Super"
+action = "SelectPreviousTab"
+
+[[keyboard.bindings]]
+key = "Right"
+mods = "Super"
+action = "SelectNextTab"

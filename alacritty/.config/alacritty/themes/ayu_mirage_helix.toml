@@ -1,0 +1,32 @@
+# Ayu Mirage - matching Ghostty/Helix color palette
+[colors.primary]
+background = "#212733"
+foreground = "#d9d7ce"
+
+[colors.cursor]
+cursor = "#ffcc66"
+text = "#212733"
+
+[colors.selection]
+background = "#343f4c"
+text = "#d9d7ce"
+
+[colors.normal]
+black   = "#191e2a"
+red     = "#ff3333"
+green   = "#bae67e"
+yellow  = "#ffd580"
+blue    = "#5ccfe6"
+magenta = "#d4bfff"
+cyan    = "#95e6cb"
+white   = "#c7c7c7"
+
+[colors.bright]
+black   = "#686868"
+red     = "#f27983"
+green   = "#a6cc70"
+yellow  = "#ffcc66"
+blue    = "#73d0ff"
+magenta = "#d4bfff"
+cyan    = "#95e6cb"
+white   = "#ffffff"
