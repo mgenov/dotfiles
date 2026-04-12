@@ -1,4 +1,5 @@
-theme = "ayu_mirage"
+#theme = "ayu_mirage"
+theme = "dracula"
 
 [editor]
 # Enable the git diff gutter (shows + / - / ~ indicators in the margin)
