@@ -144,8 +144,6 @@ _gt_yargs_completions()
 compdef _gt_yargs_completions gt
 ###-end-gt-completions-###
 
-export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
-
 # Local overrides: secrets, internal SSH aliases, machine-specific config.
 # Not version-controlled. See ~/.zshrc.local.
 [ -f "$HOME/.zshrc.local" ] && source "$HOME/.zshrc.local"
