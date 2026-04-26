@@ -1,0 +1,27 @@
+#!/usr/bin/env sh
+
+# Layout
+yabai -m config layout bsp          # binary space partitioning (auto-tiles)
+
+# Gaps
+yabai -m config window_gap 10
+yabai -m config top_padding 10
+yabai -m config bottom_padding 10
+yabai -m config left_padding 10
+yabai -m config right_padding 10
+
+# Focus follows mouse
+yabai -m config focus_follows_mouse autofocus
+
+# When a window is destroyed, focus the most recently used window
+yabai -m signal --add event=window_destroyed action="yabai -m window --focus recent 2>/dev/null"
+
+# Don't tile these apps
+yabai -m rule --add app="^System Preferences$" manage=off
+yabai -m rule --add app="^Finder$" manage=off
+
+# Title these apps
+yabai -m rule --add app="^ghostty$" manage=on
+
+yabai -m rule --add app="^qemu-system-aarch64$" title=".*Android Emulator.*" manage=on
+yabai -m rule --add app="^qemu-system-aarch64$" title="^$" manage=off
