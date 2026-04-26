@@ -19,7 +19,6 @@ export GOPATH=$HOME
 export GRADLE_OPTS=-Xmx1536m
 export PATH="$PATH:$HOME/development/go/bin/:$GOPATH/bin"
 export ANDROID_HOME="$HOME/development/android-sdk-macosx"
-export CLOUDSDK_PYTHON=/Users/mgenov/.pyenv/versions/3.10.8/bin/python
 # Kitty + Helix: reset default background on exit so transparency survives.
 # Helix (or the emulator chain) leaves OSC 11 set to an opaque color, which
 # bypasses kitty's background_opacity. OSC 111 reverts to kitty's configured bg.
@@ -76,32 +75,6 @@ function checkpl() {
     git fetch upstream pull/$1/head:pr/$1
     git checkout pr/$1
 }
-
-
-PATH="/Users/mgenov/perl5/bin${PATH:+:${PATH}}"; export PATH;
-PERL5LIB="/Users/mgenov/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="/Users/mgenov/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"/Users/mgenov/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=/Users/mgenov/perl5"; export PERL_MM_OPT;
-export PYENV_ROOT="$HOME/.pyenv"
-command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
-eval "$(pyenv init -)"
-
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-#__conda_setup="$('/Users/mgenov/miniforge3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
-#if [ $? -eq 0 ]; then
-#    eval "$__conda_setup"
-#else
-#    if [ -f "/Users/mgenov/miniforge3/etc/profile.d/conda.sh" ]; then
-#        . "/Users/mgenov/miniforge3/etc/profile.d/conda.sh"
-#    else
-#        export PATH="/Users/mgenov/miniforge3/bin:$PATH"
-#    fi
-#fi
-#unset __conda_setup
-# <<< conda initialize <<<
 
 
 # bun completions
