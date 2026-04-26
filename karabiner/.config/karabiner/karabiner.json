@@ -537,11 +537,7 @@
                                     "key_code": "n",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [
-                                    {
-                                        "shell_command": "osascript -e 'tell application \"Arc\" to make new window' && sleep 0.15 && /opt/homebrew/bin/yabai -m window --focus \"$(/opt/homebrew/bin/yabai -m query --windows --space | /usr/bin/jq -r 'map(select(.app == \"Arc\")) | sort_by(.id) | last | .id')\""
-                                    }
-                                ],
+                                "to": [{ "shell_command": "osascript -e 'tell application \"Arc\" to make new window' && sleep 0.15 && /opt/homebrew/bin/yabai -m window --focus \"$(/opt/homebrew/bin/yabai -m query --windows --space | /usr/bin/jq -r 'map(select(.app == \"Arc\")) | sort_by(.id) | last | .id')\"" }],
                                 "type": "basic"
                             }
                         ]
@@ -737,6 +733,23 @@
                         "vendor_id": 12538
                     },
                     "ignore": true
+                },
+                {
+                    "identifiers": {
+                        "is_keyboard": true,
+                        "product_id": 33553,
+                        "vendor_id": 12851
+                    },
+                    "simple_modifications": [
+                        {
+                            "from": { "key_code": "right_command" },
+                            "to": [{ "key_code": "right_option" }]
+                        },
+                        {
+                            "from": { "key_code": "right_option" },
+                            "to": [{ "key_code": "right_command" }]
+                        }
+                    ]
                 }
             ],
             "fn_function_keys": [
@@ -747,16 +760,6 @@
             ],
             "name": "Default profile",
             "selected": true,
-            "simple_modifications": [
-                {
-                    "from": { "key_code": "right_option" },
-                    "to": [{ "key_code": "right_command" }]
-                },
-                {
-                    "from": { "key_code": "right_command" },
-                    "to": [{ "key_code": "right_option" }]
-                }
-            ],
             "virtual_hid_keyboard": { "keyboard_type_v2": "ansi" }
         }
     ]
