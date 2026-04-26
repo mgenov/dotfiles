@@ -13,14 +13,6 @@ source $ZSH/oh-my-zsh.sh
 
 export PATH=/usr/local/sbin:/usr/local/bin:${PATH}
 export PATH="$HOME/bin:$PATH"
-export PATH="$HOME/development/gradle-6.3/bin:$PATH"
-export PATH="$HOME/development/google-cloud-sdk/bin:$PATH"
-export PATH="$HOME/development/maven/bin:$PATH"
-export PATH="$HOME/development/mongodb/bin:$PATH"
-export PATH="$HOME/development/google-cloud-sdk/bin:$PATH"
-export PATH="$HOME/development/gitScripts:$PATH"
-export PATH="$HOME/.duckdb/cli/latest":$PATH
-export PATH="$PATH:/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 export PATH="$HOME/.local/bin:$PATH"
 
 export GOPATH=$HOME

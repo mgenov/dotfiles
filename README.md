@@ -12,8 +12,11 @@ Each top-level directory is a stow package. Its contents mirror the target paths
 | `helix`   | `~/.config/helix/`                                    |
 | `zellij`  | `~/.config/zellij/`                                   |
 | `yazi`    | `~/.config/yazi/`                                     |
+| `karabiner`| `~/.config/karabiner/` (macOS only)                  |
+| `yabai`   | `~/.config/yabai/` (macOS only)                       |
 | `lazygit` | `~/Library/Application Support/lazygit/` (macOS path) |
 | `bin`     | `~/bin/`                                              |
+| `zsh`     | `~/` (`.zshrc`, `.zprofile`, `.zshenv`)               |
 
 ## Bootstrap on a new machine
 
@@ -26,11 +29,47 @@ git clone <REMOTE_URL> ~/dotfiles
 cd ~/dotfiles
 
 # 3. stow everything (most packages target $HOME via .config)
-stow alacritty helix zellij yazi bin
+stow alacritty helix zellij yazi bin karabiner yabai
 
-# 4. lazygit lives outside ~/.config; needs an explicit target
-stow --target="$HOME" lazygit
+# 4. packages that live directly under $HOME need an explicit target
+stow --target="$HOME" lazygit zsh
+
+# 5. create local overrides (see "Local overrides" section below)
+$EDITOR ~/.zshrc.local
 ```
+
+## Local overrides (`~/.zshrc.local`)
+
+`.zshrc` sources `~/.zshrc.local` at its tail if present. The local file
+holds anything that is machine-specific, sensitive, or workplace-private
+and must NOT be committed.
+
+Typical contents on this machine:
+
+```sh
+# Convenience hashes / personal secrets
+alias qaz='echo <some-hash>'
+
+# Internal SSH hosts (work infra)
+alias node1='ssh user@node1.example.internal'
+# ... more aliases ...
+
+# Pinned tool paths (machine-specific install locations)
+export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_111.jdk/Contents/Home
+export HELIX_RUNTIME=~/src/helix/runtime
+
+# Development tools installed under $HOME/development (or wherever)
+export PATH="$HOME/development/gradle-6.3/bin:$PATH"
+export PATH="$HOME/development/google-cloud-sdk/bin:$PATH"
+export PATH="$HOME/development/maven/bin:$PATH"
+# ... etc ...
+
+# Workspace cd shortcuts (paths specific to this checkout layout)
+alias monorepo='cd /Users/me/workspaces/idea/monorepo'
+# ... etc ...
+```
+
+Guarded by `zsh/.zshrc.local` in `.gitignore` as a safety net.
 
 ## Stack overview
 
@@ -53,5 +92,5 @@ stow --target="$HOME" lazygit
 ```sh
 cd ~/dotfiles
 stow -D alacritty helix zellij yazi bin
-stow -D --target="$HOME" lazygit
+stow -D --target="$HOME" lazygit zsh
 ```
