@@ -26,7 +26,6 @@ export PATH="$HOME/.local/bin:$PATH"
 export GOPATH=$HOME
 export GRADLE_OPTS=-Xmx1536m
 export PATH="$PATH:$HOME/development/go/bin/:$GOPATH/bin"
-export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_111.jdk/Contents/Home
 export ANDROID_HOME="$HOME/development/android-sdk-macosx"
 export CLOUDSDK_PYTHON=/Users/mgenov/.pyenv/versions/3.10.8/bin/python
 # Kitty + Helix: reset default background on exit so transparency survives.
@@ -46,7 +45,6 @@ export PATH="$PATH:$ANDROID_HOME/platform-tools"
 export PATH="$HOME/.yarn/bin:$PATH"
 export PATH="./node_modules/.bin:$PATH"
 export PATH="/opt/homebrew/opt/mongodb-community@5.0/bin:$PATH"
-export HELIX_RUNTIME=~/src/helix/runtime
 
 alias gs=git-spice
 eval "$(git-spice shell completion zsh)"
@@ -59,17 +57,6 @@ alias cc='claude'
 alias ls='ls -G'
 alias ll='ls -lG'
 alias duh='du -csh'
-alias monorepo='cd /Users/mgenov/workspaces/idea/monorepo'
-alias bss='cd /Users/mgenov/workspaces/idea/telcong.bss'
-alias oss='cd $GOPATH/src/github.com/clouway/'
-alias tgps='cd $GOPATH/src/github.com/clouway/tgps/'
-alias admin='cd $GOPATH/src/github.com/clouway/cloudplatform/telcong-admin'
-alias wss='cd /Users/mgenov/workspaces/idea/telcong.wss'
-alias mg='cd $GOPATH/src/github.com/mgenov'
-alias js='cd /Users/mgenov/workspaces/js'
-alias infra='cd /Users/mgenov/workspaces/infra/cloud-infra'
-alias proto='cd /Users/mgenov/workspaces/proto/clouway-proto'
-alias n='cd /Users/mgenov/workspaces/private'
 export LSCOLORS="ExGxBxDxCxEgEdxbxgxcxd"
 export GREP_OPTIONS="--color"
 
