@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+# tm-vault — notes / shell / agent windows for memory-vault.
+# Usage:  tm-vault                 # uses ~/workspaces/memory-vault
+#         tm-vault <name> <path>
+set -e
+
+path="${2:-$HOME/workspaces/memory-vault}"
+name="${1:-vault}"
+
+if tmux has-session -t="$name" 2>/dev/null; then
+    [[ -z "$TMUX" ]] && exec tmux attach -t "$name"
+    exec tmux switch-client -t "$name"
+fi
+
+tmux new-session -ds "$name" -c "$path" -n notes "nvim ."
+tmux new-window -t "$name:"  -c "$path" -n shell "zsh"
+tmux new-window -t "$name:"  -c "$path" -n agent "zsh -i -c x"
+tmux select-window -t "$name:notes"
+
+[[ -z "$TMUX" ]] && exec tmux attach -t "$name"
+exec tmux switch-client -t "$name"

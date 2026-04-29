@@ -491,7 +491,7 @@
                         ]
                     },
                     {
-                        "description": "Hyper Key Zellij Session Manager (t)",
+                        "description": "Hyper Key tmux Project Switcher (t)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -501,12 +501,12 @@
                                         "value": 1
                                     }
                                 ],
-                                "description": "Focus kitty + open zellij session manager",
+                                "description": "Focus kitty + open tmux project picker",
                                 "from": {
                                     "key_code": "t",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "shell_command": "/Users/mgenov/bin/zj-switch" }],
+                                "to": [{ "shell_command": "/Users/mgenov/bin/tm-switch" }],
                                 "type": "basic"
                             }
                         ]

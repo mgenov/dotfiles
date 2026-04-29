@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+# tm-infra — code / shell / agent windows (no logs tab).
+# Usage:  cd ~/work/cloud-infra && tm-infra [<session-name>]
+set -e
+
+path="${2:-$PWD}"
+name="${1:-$(basename "$path" | tr '. ' '__')}"
+
+if tmux has-session -t="$name" 2>/dev/null; then
+    [[ -z "$TMUX" ]] && exec tmux attach -t "$name"
+    exec tmux switch-client -t "$name"
+fi
+
+tmux new-session -ds "$name" -c "$path" -n code  "nvim ."
+tmux new-window -t "$name:"  -c "$path" -n shell "zsh"
+tmux new-window -t "$name:"  -c "$path" -n agent "zsh -i -c x"
+tmux select-window -t "$name:code"
+
+[[ -z "$TMUX" ]] && exec tmux attach -t "$name"
+exec tmux switch-client -t "$name"

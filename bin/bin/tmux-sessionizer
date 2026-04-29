@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# tmux-sessionizer — fuzzy-pick a project from ~/work and attach a tmux session.
+#
+# Usage:
+#   tmux-sessionizer            # interactive fzf
+#   tmux-sessionizer <path>     # attach session for an explicit dir
+
+set -e
+
+# Ensure fzf/tmux are findable when launched from non-interactive contexts
+# (kitty @ launch, Karabiner shell_command — these don't source zshrc).
+export PATH="$HOME/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+if [[ $# -eq 1 ]]; then
+    selected=$1
+else
+    # Search depth-1 under work + dotfiles + memory-vault.
+    # Add lines here as the layout grows.
+    selected=$(
+        {
+            find "$HOME/work" -mindepth 1 -maxdepth 1 -type d 2>/dev/null
+            find "$HOME/work" -mindepth 2 -maxdepth 2 -type d -name '.git' 2>/dev/null \
+                | sed 's|/.git$||'
+            [[ -d "$HOME/dotfiles" ]] && echo "$HOME/dotfiles"
+            [[ -d "$HOME/workspaces/memory-vault" ]] && echo "$HOME/workspaces/memory-vault"
+        } | sort -u | fzf --reverse --prompt='project> '
+    )
+fi
+
+[[ -z "$selected" ]] && exit 0
+
+selected_name=$(basename "$selected" | tr '. ' '__')
+tmux_running=$(pgrep -x tmux || true)
+
+# Case 1: not in tmux and no server running → boot a new session attached.
+if [[ -z "$TMUX" && -z "$tmux_running" ]]; then
+    exec tmux new-session -s "$selected_name" -c "$selected"
+fi
+
+# Case 2: server running but session missing → create it detached.
+if ! tmux has-session -t="$selected_name" 2>/dev/null; then
+    tmux new-session -ds "$selected_name" -c "$selected"
+fi
+
+# Case 3: switch to it.
+if [[ -z "$TMUX" ]]; then
+    exec tmux attach -t "$selected_name"
+else
+    exec tmux switch-client -t "$selected_name"
+fi

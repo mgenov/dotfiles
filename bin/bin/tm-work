@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# tm-work — code / shell / agent / logs windows for a repo.
+# Usage:  cd ~/work/monorepo && tm-work [<session-name>]
+#         tm-work <name> <path>
+set -e
+
+path="${2:-$PWD}"
+name="${1:-$(basename "$path" | tr '. ' '__')}"
+shell_cmd="zsh"
+agent_cmd="zsh -i -c x"
+
+if tmux has-session -t="$name" 2>/dev/null; then
+    [[ -z "$TMUX" ]] && exec tmux attach -t "$name"
+    exec tmux switch-client -t "$name"
+fi
+
+tmux new-session  -ds "$name" -c "$path" -n code "nvim ."
+tmux new-window  -t "$name:" -c "$path" -n shell  "$shell_cmd"
+tmux new-window  -t "$name:" -c "$path" -n agent  "$agent_cmd"
+tmux new-window  -t "$name:" -c "$path" -n logs   "$shell_cmd"
+tmux select-window -t "$name:code"
+
+[[ -z "$TMUX" ]] && exec tmux attach -t "$name"
+exec tmux switch-client -t "$name"

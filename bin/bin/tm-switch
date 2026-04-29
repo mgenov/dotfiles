@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+# tm-switch — Karabiner-callable. Focus kitty and present the project picker.
+#
+# Strategy (in order):
+#   1. kitty not running         → cold-launch kitty with sessionizer.
+#   2. tmux server running       → focus kitty, show sessionizer as a tmux popup.
+#   3. tmux server not running   → focus kitty, open sessionizer in a new tab.
+
+set -e
+
+KITTY_BIN="/Applications/kitty.app/Contents/MacOS/kitty"
+SESSIONIZER="$HOME/bin/tmux-sessionizer"
+
+# Case 1: cold start.
+if ! pgrep -x kitty >/dev/null; then
+    exec open -na /Applications/kitty.app --args \
+        --single-instance \
+        -e bash -lc "$SESSIONIZER"
+fi
+
+# Bring kitty to the foreground (no-op if already focused).
+open -a /Applications/kitty.app
+
+# Case 2: reuse the running tmux client via a popup overlay.
+# Probe the socket file directly — Karabiner's shell context is unreliable.
+TMUX_SOCKET="${TMUX_SOCKET:-/tmp/tmux-$(id -u)/default}"
+if [[ -S "$TMUX_SOCKET" ]]; then
+    export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+    exec tmux display-popup -E -w 60% -h 60% "$SESSIONIZER"
+fi
+
+# Case 3: no tmux server — open sessionizer in a new tab of the focused window.
+exec "$KITTY_BIN" @ launch \
+    --type=tab \
+    --cwd="$HOME" \
+    --title="sessionizer" \
+    bash -lc "$SESSIONIZER"
