@@ -6,10 +6,6 @@ auto-format = true
 [language-server.taplo]
 config = {}
 
-[language-server.gopls]
-command = "gopls"
-args = ["serve"]
-
 [language-server.harper-ls]
 command = "harper-ls"
 args = ["--stdio"]
@@ -17,6 +13,17 @@ args = ["--stdio"]
 [language-server.harper-ls.config.harper-ls.linters]
 SpellCheck = false
 SentenceCapitalization = false
+
+[language-server.harper-ls.config.harper-ls.codeActions]
+ForceStable = false
+
+[language-server.harper-ls.config.harper-ls.markdown]
+IgnoreLinkTitle = false
+
+[language-server.gopls]
+command = "gopls"
+args = ["serve"]
+
 
 [language-server.tailwindcss-ls]
 command = "tailwindcss-language-server"
@@ -26,7 +33,7 @@ config = { userLanguages = { "*.tsx" = "html", "*.jsx" = "html" } }
 # Hook gopls up for Go and auto-format (gofumpt via gopls)
 [[language]]
 name = "go"
-language-servers = ["gopls"]
+language-servers = ["gopls", "harper-ls"]
 auto-format = true
 formatter = { command = "goimports" }
 
@@ -38,7 +45,10 @@ auto-format = true
 
 [[language]]
 name = "markdown"
-language-servers = ["harper-ls"]
+language-servers = ["markdown-oxide", "harper-ls"]
+# [[language]]
+# name = "markdown"
+# language-servers = ["harper-ls"]
 
 # Configure the "git-commit" language type
 [[language]]
@@ -65,9 +75,9 @@ auto-format = true
 [[language]]
 name = "tsx"
 auto-format = true
-language-servers = ["tailwindcss-ls", "typescript-language-server"]
+language-servers = ["tailwindcss-ls", "typescript-language-server", "harper-ls"]
 
 [[language]]
 name = "jsx"
 auto-format = true
-language-servers = ["tailwindcss-ls", "typescript-language-server"]
+language-servers = ["tailwindcss-ls", "typescript-language-server", "harper-ls"]
