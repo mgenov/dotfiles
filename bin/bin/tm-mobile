@@ -1,39 +1,51 @@
 #!/usr/bin/env bash
-# tm-mobile — Politis mobile dev session.
+# tm-mobile — add Politis mobile dev windows to the agent-c worktree session.
 #   • code   : nvim .
 #   • dev    : android shell on top, metro + emulator side-by-side on bottom
 #   • agent  : claude
 #   • logs   : adb logcat -s Politis
 #
-# Usage:  tm-mobile                 # default path: ~/work/monorepo-agent-c/politis/client/mobile
-#         tm-mobile <name> <path>
+# Composes with tmux-sessionizer: the session is named after the worktree
+# (default `monorepo-agent-c`), so picking the worktree from sessionizer or
+# running tm-mobile lands in the same session. Idempotent — only creates
+# windows that don't already exist; never touches existing ones.
+#
+# Usage:  tm-mobile                              # ~/work/monorepo-agent-c
+#         tm-mobile <name> <worktree-path>
 set -e
 
-path="${2:-$HOME/work/monorepo-agent-c/politis/client/mobile}"
-name="${1:-mobile}"
+worktree="${2:-$HOME/work/monorepo-agent-c}"
+name="${1:-$(basename "$worktree" | tr '. ' '__')}"
+mobile="$worktree/politis/client/mobile"
 
-if tmux has-session -t="$name" 2>/dev/null; then
-    [[ -z "$TMUX" ]] && exec tmux attach -t "$name"
-    exec tmux switch-client -t "$name"
+window_exists() {
+    tmux list-windows -t "$name" -F '#W' 2>/dev/null | grep -Fxq "$1"
+}
+
+ensure_simple() {
+    local win="$1" cmd="$2"
+    window_exists "$win" && return
+    tmux new-window -t "$name:" -c "$mobile" -n "$win" "$cmd"
+}
+
+ensure_dev() {
+    window_exists dev && return
+    tmux new-window   -t "$name:"      -c "$mobile" -n dev
+    tmux split-window -t "$name:dev"   -v -l 60% -c "$mobile"
+    tmux split-window -t "$name:dev.2" -h         -c "$mobile"
+    tmux send-keys    -t "$name:dev.2" "npm run start" C-m
+    tmux send-keys    -t "$name:dev.3" "echo 'Run: npx react-native run-android'" C-m
+    tmux select-pane  -t "$name:dev.1"
+}
+
+if ! tmux has-session -t="$name" 2>/dev/null; then
+    tmux new-session -ds "$name" -c "$worktree"
 fi
 
-# code
-tmux new-session -ds "$name" -c "$path" -n code "nvim ."
-
-# dev: pane 1 = android shell (top), pane 2/3 = metro + emulator (bottom row)
-tmux new-window   -t "$name:"     -c "$path" -n dev
-tmux split-window -t "$name:dev"  -v -l 60% -c "$path"   # pane 2 below pane 1
-tmux split-window -t "$name:dev.2" -h        -c "$path"  # pane 3 right of pane 2
-tmux send-keys -t "$name:dev.2" "npm run start" C-m
-tmux send-keys -t "$name:dev.3" "echo 'Run: npx react-native run-android'" C-m
-tmux select-pane -t "$name:dev.1"
-
-# agent
-tmux new-window -t "$name:" -c "$path" -n agent "zsh -i -c x"
-
-# logs
-tmux new-window -t "$name:" -c "$path" -n logs "adb logcat -s Politis"
-
+ensure_simple code  "nvim ."
+ensure_dev
+ensure_simple agent "zsh -i -c x"
+ensure_simple logs  "adb logcat -s Politis"
 tmux select-window -t "$name:code"
 
 [[ -z "$TMUX" ]] && exec tmux attach -t "$name"
