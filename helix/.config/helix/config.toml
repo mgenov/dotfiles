@@ -50,11 +50,11 @@ j = { k = "normal_mode" }
 [keys.normal]
 ret = ":write"
 C-q = ":bc"
-"," = { "," = "keep_primary_selection", q = ":bc", w = ":w", x = ":x", r = ":rla" }
+"," = { "," = "keep_primary_selection", q = ":bco", w = ":w", x = ":x", r = ":rla" }
 # C-h = ":buffer-previous"
 # C-l = ":buffer-next"
 # LazyGit: runs inside Helix's terminal, writes selected file to /tmp, then kills itself.
-# Helix reads the path and opens the file. No Zellij floating panes needed.
+# Helix reads the path and opens the file.
 C-g = [
   ":sh rm -f /tmp/lazygit-path",
   ":write-all",
@@ -68,7 +68,7 @@ C-g = [
   ":set mouse false",
   ":set mouse true",
 ]
-# Yazi: runs inside Helix's terminal via --chooser-file. No Zellij floating panes needed.
+# Yazi: runs inside Helix's terminal via --chooser-file.
 C-e = [
   ":sh rm -f /tmp/unique-file-u41ae14",
   ":insert-output yazi '%{buffer_name}' --chooser-file=/tmp/unique-file-u41ae14",

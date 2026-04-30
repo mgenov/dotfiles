@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+
+set -euo pipefail
+
+socket="${NVIM_SOCKET:-${XDG_RUNTIME_DIR:-$HOME/.cache}/nvim/editor.sock}"
+
+if [[ -n "${NVIM:-}" ]]; then
+  exec nvim --server "$NVIM" --remote-tab-silent "$@"
+fi
+
+if nvim --server "$socket" --remote-expr '1' >/dev/null 2>&1; then
+  exec nvim --server "$socket" --remote-tab-silent "$@"
+fi
+
+exec nvim "$@"

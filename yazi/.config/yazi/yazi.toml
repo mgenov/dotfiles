@@ -1,14 +1,51 @@
 [opener]
 edit = [
-  { run = 'zjctl pane focus --pane cmd:hx && zjctl pane send --pane cmd:hx --enter=false -- ":open $1" && zellij action write 13 && zjctl pane close --pane cmd:yazi', block = false, desc = "Open in Helix" },
+  { run = '$HOME/bin/nvim-open "$1"', block = false, desc = "Open in Neovim" },
 ]
 
 [open]
 rules = [
-  { mime = "text/*",          use = "edit" },
-  { mime = "application/json", use = "edit" },
-  { mime = "application/x-yaml", use = "edit" },
-  { mime = "application/toml", use = "edit" },
-  { name = "*",               use = "edit" },
-  { name = "*.*",             use = "edit" },
+  # Folder
+  { url = "*/", use = [
+    "edit",
+    "open",
+    "reveal",
+  ] },
+  # Text
+  { mime = "text/*", use = [
+    "edit",
+    "reveal",
+  ] },
+  # Image
+  { mime = "image/*", use = [
+    "open",
+    "reveal",
+  ] },
+  # Media
+  { mime = "{audio,video}/*", use = [
+    "play",
+    "reveal",
+  ] },
+  # Code
+  { mime = "application/{json,ndjson,javascript,wine-extension-ini}", use = [
+    "edit",
+    "reveal",
+  ] },
+  # Archive
+  { mime = "application/{zip,rar,7z*,tar,gzip,xz,zstd,bzip*,lzma,compress,archive,cpio,arj,xar,ms-cab*}", use = [
+    "extract",
+    "reveal",
+  ] },
+  # Empty file
+  { mime = "inode/empty", use = [
+    "edit",
+    "reveal",
+  ] },
+  # Virtual file system
+  { mime = "vfs/{absent,stale}", use = "download" },
+  # Fallback
+  { url = "*", use = [
+    "open",
+    "reveal",
+  ] },
 ]

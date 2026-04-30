@@ -19,17 +19,13 @@ export GOPATH=$HOME
 export GRADLE_OPTS=-Xmx1536m
 export PATH="$PATH:$HOME/development/go/bin/:$GOPATH/bin"
 export ANDROID_HOME="$HOME/development/android-sdk-macosx"
-# Kitty + Helix: reset default background on exit so transparency survives.
-# Helix (or the emulator chain) leaves OSC 11 set to an opaque color, which
-# bypasses kitty's background_opacity. OSC 111 reverts to kitty's configured bg.
-# Uses ~/bin/hx-term wrapper so child processes (e.g. git's core.editor)
-# also reset OSC 11 — shell functions aren't inherited by exec'd children.
-export KUBE_EDITOR="$HOME/bin/hx-term"
-export EDITOR="$HOME/bin/hx-term"
-export VISUAL="$HOME/bin/hx-term"
+export NVIM_SOCKET="${XDG_RUNTIME_DIR:-$HOME/.cache}/nvim/editor.sock"
+export KUBE_EDITOR="$HOME/bin/nvim-open"
+export EDITOR="$HOME/bin/nvim-open"
+export VISUAL="$HOME/bin/nvim-open"
 
-hx() {
-  "$HOME/bin/hx-term" "$@"
+v() {
+  "$HOME/bin/nvim-open" "$@"
 }
 export PATH="$PATH:$ANDROID_HOME/tools"
 export PATH="$PATH:$ANDROID_HOME/platform-tools"
@@ -41,7 +37,8 @@ alias gs=git-spice
 eval "$(git-spice shell completion zsh)"
 
 if type nvim > /dev/null 2>&1; then
-  alias vim='nvim'
+  alias vim='$HOME/bin/nvim-open'
+  alias vi='$HOME/bin/nvim-open'
 fi
 alias x='claude --dangerously-skip-permissions'
 alias cc='claude'

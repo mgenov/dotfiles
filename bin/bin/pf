@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# pf — open kubectl port-forward panes in the current Zellij tab.
+# pf — open kubectl port-forward panes in a new tmux window.
 #
 # Usage:
 #   pf svc/billing:8080                          # default namespace
@@ -20,6 +20,11 @@
 set -e
 
 export PATH="$HOME/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+if [[ -z "$TMUX" ]]; then
+  echo "pf: must be run from inside a tmux session" >&2
+  exit 1
+fi
 
 # Parse global flags
 local global_flags=""
@@ -64,23 +69,27 @@ _pf_parse() {
   echo "$ns_flag $resource $port"
 }
 
-# Create a new tab — initial pane becomes the shell (left side)
-zellij action new-tab --name "pf"
+# Create a new window — initial pane becomes the shell (left side)
+local shell_pane
+shell_pane="$(tmux new-window -n "pf" -c "$PWD" -P -F '#{pane_id}')"
 
 # First port-forward: split right (creates the right column)
-zellij action new-pane --direction right
-local parsed="$(_pf_parse "$1")"
-zellij action write-chars "kubectl port-forward$global_flags $parsed"
-zellij action write 13
+local prev_pane
+prev_pane="$(tmux split-window -h -t "$shell_pane" -P -F '#{pane_id}')"
+local parsed
+parsed="$(_pf_parse "$1")"
+tmux send-keys -t "$prev_pane" "kubectl port-forward$global_flags $parsed" Enter
 shift
 
 # Remaining port-forwards: stack downward in the right column
 for target in "$@"; do
-  zellij action new-pane --direction down
+  prev_pane="$(tmux split-window -v -t "$prev_pane" -P -F '#{pane_id}')"
   parsed="$(_pf_parse "$target")"
-  zellij action write-chars "kubectl port-forward$global_flags $parsed"
-  zellij action write 13
+  tmux send-keys -t "$prev_pane" "kubectl port-forward$global_flags $parsed" Enter
 done
 
+# Even out the right-column panes
+tmux select-layout -t "$shell_pane" main-vertical 2>/dev/null || true
+
 # Focus back to the shell pane (left side)
-zellij action move-focus left
+tmux select-pane -t "$shell_pane"

@@ -9,8 +9,10 @@ Each top-level directory is a stow package. Its contents mirror the target paths
 | Package   | Target                                                |
 | --------- | ----------------------------------------------------- |
 | `alacritty`| `~/.config/alacritty/`                               |
+| `kitty`   | `~/.config/kitty/`                                    |
 | `helix`   | `~/.config/helix/`                                    |
-| `zellij`  | `~/.config/zellij/`                                   |
+| `nvim`    | `~/.config/nvim/`                                     |
+| `tmux`    | `~/.config/tmux/`                                     |
 | `yazi`    | `~/.config/yazi/`                                     |
 | `karabiner`| `~/.config/karabiner/` (macOS only)                  |
 | `yabai`   | `~/.config/yabai/` (macOS only)                       |
@@ -22,14 +24,14 @@ Each top-level directory is a stow package. Its contents mirror the target paths
 
 ```sh
 # 1. install prerequisites
-brew install stow alacritty helix zellij yazi lazygit git-delta
+brew install stow alacritty kitty helix neovim tmux yazi lazygit git-delta
 
 # 2. clone this repo
 git clone <REMOTE_URL> ~/dotfiles
 cd ~/dotfiles
 
 # 3. stow everything (most packages target $HOME via .config)
-stow alacritty helix zellij yazi bin karabiner yabai
+stow alacritty kitty helix nvim tmux yazi bin karabiner yabai
 
 # 4. packages that live directly under $HOME need an explicit target
 stow --target="$HOME" lazygit zsh
@@ -65,7 +67,7 @@ export PATH="$HOME/development/maven/bin:$PATH"
 # ... etc ...
 
 # Workspace cd shortcuts (paths specific to this checkout layout)
-alias monorepo='cd /Users/me/workspaces/idea/monorepo'
+alias monorepo='cd /Users/me/work/monorepo'
 # ... etc ...
 ```
 
@@ -74,23 +76,21 @@ Guarded by `zsh/.zshrc.local` in `.gitignore` as a safety net.
 ## Stack overview
 
 - **Alacritty** — GPU-accelerated terminal emulator
-- **Helix** — modal editor
-- **Zellij** — terminal multiplexer; `wt <name>` (in `bin/`) launches per-worktree sessions with editor / shell / agent / logs tabs
-- **Yazi** — file manager, opens files in the running Helix pane via `zjctl`
-- **LazyGit** — git TUI, `e` opens files in the running Helix pane via `zjctl`
-- **zjctl** — out-of-band Zellij pane control, install with `cargo install zjctl && zjctl install --load`
+- **Helix** — previous modal editor config kept around
+- **Neovim** — current modal editor config with built-in LSP and Go/Bazel shortcuts
+- **tmux** — terminal multiplexer; `prefix` is `C-a`, `prefix f` runs `tmux-sessionizer`
+- **Yazi** — file manager, opens files in the running Neovim instance
+- **LazyGit** — git TUI, opens files in the running Neovim instance
 
 ## Notes
 
-- `bin/wt` is a launcher script; assumes worktrees live at `~/workspaces/idea/monorepo*` and `~/workspaces/infra/{fleet,cloud}-infra`. Edit the case statement for your own layout.
-- `lazygit` overrides the built-in `e` keybinding (`universal.edit` is moved to `<c-e>`) so a custom command can dispatch to Helix.
-- Helix uses `Ctrl-g` for LazyGit and `Ctrl-e` for Yazi (both spawn floating Zellij panes).
-- Zellij runs in `locked` mode by default; `Alt-z` unlocks; `Alt-h/l` and `Alt-1..5` navigate tabs without leaving locked mode.
+- `nvim-session` starts Neovim with a fixed RPC socket so Yazi and LazyGit can reuse the running editor.
+- Yazi and LazyGit call `nvim-open`, which opens files in the active Neovim server when available.
 
 ## Unstowing
 
 ```sh
 cd ~/dotfiles
-stow -D alacritty helix zellij yazi bin
+stow -D alacritty helix nvim tmux yazi bin
 stow -D --target="$HOME" lazygit zsh
 ```
