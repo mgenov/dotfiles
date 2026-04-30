@@ -5,10 +5,15 @@ ZSH_THEME="cloud"
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git)
+# fzf-tab must load after compinit (oh-my-zsh handles this) and before
+# zsh-autosuggestions/zsh-syntax-highlighting. zsh-syntax-highlighting must be last.
+plugins=(git fzf-tab zsh-nvm zsh-autosuggestions zsh-syntax-highlighting)
 
 fpath=($HOME/bin $fpath)
 source $ZSH/oh-my-zsh.sh
+
+# fzf key bindings (Ctrl-R history, Ctrl-T files, Alt-C cd) and completion.
+[[ -o interactive ]] && command -v fzf >/dev/null && source <(fzf --zsh)
 
 
 export PATH=/usr/local/sbin:/usr/local/bin:${PATH}
@@ -81,9 +86,7 @@ function checkpl() {
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+# nvm is loaded lazily via the zsh-nvm plugin (NVM_LAZY=true by default).
 #compdef gt
 ###-begin-gt-completions-###
 #
