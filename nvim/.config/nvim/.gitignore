@@ -1,0 +1,12 @@
+tags
+test.sh
+.luarc.json
+nvim
+
+spell/
+
+# Track lazy-lock.json in this personal fork — pins plugin versions across machines.
+# https://lazy.folke.io/usage/lockfile
+# lazy-lock.json
+
+.DS_Store
