@@ -13,8 +13,11 @@ yabai -m config right_padding 10
 # Focus follows mouse
 yabai -m config focus_follows_mouse autofocus
 
-# When a window is destroyed, focus the most recently used window
-yabai -m signal --add event=window_destroyed action="yabai -m window --focus recent 2>/dev/null"
+# When a window is destroyed AND focus is lost, focus the most recently used window.
+# The query guard prevents firing on transient system popups (e.g. input source HUD
+# from Cmd+Space) which destroy themselves without ever taking focus — without it,
+# the recent-focus action would yank focus to a random recent app.
+yabai -m signal --add event=window_destroyed action="yabai -m query --windows --window >/dev/null 2>&1 || yabai -m window --focus recent 2>/dev/null"
 
 # Don't tile these apps
 yabai -m rule --add app="^System Preferences$" manage=off
