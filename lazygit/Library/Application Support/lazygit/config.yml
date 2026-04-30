@@ -10,5 +10,4 @@ git:
     - colorArg: always
       pager: delta --paging=never
 os:
-  edit: "$HOME/bin/nvim-open {{filename}}"
-  editAtLine: "$HOME/bin/nvim-open +{{line}} {{filename}}"
+  editPreset: nvim-remote
