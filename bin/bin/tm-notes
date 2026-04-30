@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
-# tm-vault — notes / shell / agent windows for memory-vault.
-# Usage:  tm-vault                 # uses ~/workspaces/memory-vault
-#         tm-vault <name> <path>
+# tm-notes — notes / shell / agent windows for the AI agent docs tree.
+# Usage:  tm-notes                 # uses ~/work/notes
+#         tm-notes <name> <path>
 set -e
 
-path="${2:-$HOME/workspaces/memory-vault}"
-name="${1:-vault}"
+path="${2:-$HOME/work/notes}"
+name="${1:-notes}"
 
 ensure_window() {
     local win="$1" cmd="$2"

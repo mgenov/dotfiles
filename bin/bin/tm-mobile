@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# tm-mobile — add Politis mobile dev windows to the agent-c worktree session.
+# tm-mobile — add Politis mobile dev windows to the mobile worktree session.
 #   • code   : nvim .
 #   • dev    : android shell on top, metro + emulator side-by-side on bottom
 #   • agent  : claude
 #   • logs   : adb logcat -s Politis
 #
 # Composes with tmux-sessionizer: the session is named after the worktree
-# (default `monorepo-agent-c`), so picking the worktree from sessionizer or
+# (default `monorepo-mobile`), so picking the worktree from sessionizer or
 # running tm-mobile lands in the same session. Idempotent — only creates
 # windows that don't already exist; never touches existing ones.
 #
-# Usage:  tm-mobile                              # ~/work/monorepo-agent-c
+# Usage:  tm-mobile                              # ~/work/monorepo-mobile
 #         tm-mobile <name> <worktree-path>
 set -e
 
-worktree="${2:-$HOME/work/monorepo-agent-c}"
+worktree="${2:-$HOME/work/monorepo-mobile}"
 name="${1:-$(basename "$worktree" | tr '. ' '__')}"
 mobile="$worktree/politis/client/mobile"
 

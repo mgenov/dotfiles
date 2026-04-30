@@ -14,15 +14,13 @@ export PATH="$HOME/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:
 if [[ $# -eq 1 ]]; then
     selected=$1
 else
-    # Search depth-1 under work + dotfiles + memory-vault.
-    # Add lines here as the layout grows.
+    # Search depth-1 under work + dotfiles. Add lines as the layout grows.
     selected=$(
         {
             find "$HOME/work" -mindepth 1 -maxdepth 1 -type d 2>/dev/null
             find "$HOME/work" -mindepth 2 -maxdepth 2 -type d -name '.git' 2>/dev/null \
                 | sed 's|/.git$||'
             [[ -d "$HOME/dotfiles" ]] && echo "$HOME/dotfiles"
-            [[ -d "$HOME/workspaces/memory-vault" ]] && echo "$HOME/workspaces/memory-vault"
         } | sort -u | fzf --reverse --prompt='project> '
     )
 fi
