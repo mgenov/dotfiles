@@ -1,0 +1,6 @@
+# Shared caches across all Bazel workspaces / worktrees on this machine.
+# Auto-loaded by Bazel from $HOME/.bazelrc on every invocation.
+# https://bazel.build/run/bazelrc
+
+build --disk_cache=/Users/mgenov/.cache/bazel-disk-cache
+build --repository_cache=/Users/mgenov/.cache/bazel-repo-cache

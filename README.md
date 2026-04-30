@@ -18,6 +18,7 @@ Each top-level directory is a stow package. Its contents mirror the target paths
 | `yabai`   | `~/.config/yabai/` (macOS only)                       |
 | `lazygit` | `~/Library/Application Support/lazygit/` (macOS path) |
 | `bin`     | `~/bin/`                                              |
+| `bazel`   | `~/` (`.bazelrc`)                                     |
 | `zsh`     | `~/` (`.zshrc`, `.zprofile`, `.zshenv`)               |
 
 ## Bootstrap on a new machine
@@ -34,7 +35,7 @@ cd ~/dotfiles
 stow alacritty kitty helix nvim tmux yazi bin karabiner yabai
 
 # 4. packages that live directly under $HOME need an explicit target
-stow --target="$HOME" lazygit zsh
+stow --target="$HOME" lazygit zsh bazel
 
 # 5. create local overrides (see "Local overrides" section below)
 $EDITOR ~/.zshrc.local
@@ -92,5 +93,5 @@ Guarded by `zsh/.zshrc.local` in `.gitignore` as a safety net.
 ```sh
 cd ~/dotfiles
 stow -D alacritty helix nvim tmux yazi bin
-stow -D --target="$HOME" lazygit zsh
+stow -D --target="$HOME" lazygit zsh bazel
 ```

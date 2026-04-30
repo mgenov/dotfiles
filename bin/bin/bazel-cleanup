@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+# bazel-cleanup — remove orphaned Bazel output bases on this machine.
+#
+# Walks each Bazel-flavored worktree under ~/work, reads its bazel-<name>
+# convenience symlink to find which output_base hash maps to it, then
+# lists or removes everything under /private/var/tmp/_bazel_$USER/ that
+# no live worktree points at. Skips `cache/` and `install/` (Bazel
+# internal — never delete these).
+#
+# Usage:
+#   bazel-cleanup            # dry-run: list orphans, show sizes
+#   bazel-cleanup --apply    # delete after a y/N confirmation
+
+set -euo pipefail
+
+root="/private/var/tmp/_bazel_$USER"
+[[ -d "$root" ]] || { echo "no Bazel state at $root"; exit 0; }
+
+apply=0
+[[ "${1:-}" == --apply ]] && apply=1
+
+# Find Bazel workspaces under ~/work (any dir containing a Bazel marker file)
+worktrees=$(find "$HOME/work" -mindepth 1 -maxdepth 2 \
+              \( -name 'WORKSPACE' -o -name 'WORKSPACE.bazel' -o -name 'MODULE.bazel' \) \
+              2>/dev/null | xargs -n1 dirname | sort -u)
+
+# Build alive set as text lines: "<hash> <worktree>"
+# (avoid `declare -A` so this works on macOS's bash 3.2)
+alive=""
+while IFS= read -r wt; do
+    [[ -z "$wt" ]] && continue
+    for link in "$wt"/bazel-*; do
+        [[ -L "$link" ]] || continue
+        target=$(readlink "$link")
+        if [[ "$target" =~ /_bazel_$USER/([^/]+)/ ]]; then
+            alive+="${BASH_REMATCH[1]} $wt"$'\n'
+        fi
+    done
+done <<< "$worktrees"
+
+echo "Active output bases:"
+if [[ -z "$alive" ]]; then
+    echo "  (none — no live worktree mappings found)"
+else
+    echo "$alive" | sed '/^$/d' | sort -u | awk '{printf "  %s  →  %s\n", $1, $2}'
+fi
+
+# Identify orphans
+orphans=()
+for d in "$root"/*; do
+    [[ -d "$d" ]] || continue
+    base=$(basename "$d")
+    case "$base" in
+        cache|install) continue ;;
+    esac
+    if printf '%s' "$alive" | grep -q "^$base "; then
+        continue
+    fi
+    orphans+=("$d")
+done
+
+echo ""
+if [[ ${#orphans[@]} -eq 0 ]]; then
+    echo "No orphans."
+    exit 0
+fi
+
+echo "Orphan output bases:"
+for o in "${orphans[@]}"; do
+    sz=$(du -sh "$o" 2>/dev/null | awk '{print $1}')
+    printf "  %s  %s\n" "$sz" "$o"
+done
+
+if [[ $apply -ne 1 ]]; then
+    echo ""
+    echo "Dry-run. Re-run with --apply to delete."
+    exit 0
+fi
+
+echo ""
+read -r -p "Delete ${#orphans[@]} orphan(s)? [y/N] " confirm
+[[ "$confirm" =~ ^[yY] ]] || { echo "aborted"; exit 0; }
+
+for o in "${orphans[@]}"; do
+    echo "removing $o"
+    chmod -R u+w "$o" 2>/dev/null || true
+    rm -rf "$o"
+done
+
+echo "done"
