@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# wt — ephemeral worktree helper anchored at the monorepo.
+
+set -e
+
+repo="${WT_REPO:-$HOME/work/monorepo}"
+
+usage() {
+    cat <<EOF
+wt — ephemeral worktree helper.
+
+Usage:
+  wt add <name> [<branch>]   create ~/work/wt-<name>; new branch wt/<name>
+                             if <branch> is omitted, otherwise check out
+                             <branch> (existing local or remote-tracking)
+  wt rm  <name>              remove ~/work/wt-<name> + its tmux session
+  wt ls                      list current wt-* worktrees
+
+Anchor repo: \$WT_REPO (default: $repo).
+EOF
+}
+
+case "${1:-}" in
+    add)
+        name="${2:?Usage: wt add <name> [<branch>]}"
+        branch="${3:-}"
+        path="$HOME/work/wt-$name"
+        [[ -e "$path" ]] && { echo "$path already exists" >&2; exit 1; }
+        if [[ -n "$branch" ]]; then
+            git -C "$repo" worktree add "$path" "$branch"
+        else
+            git -C "$repo" worktree add -b "wt/$name" "$path"
+        fi
+        echo "→ $path"
+        ;;
+    rm)
+        name="${2:?Usage: wt rm <name>}"
+        path="$HOME/work/wt-$name"
+        tmux kill-session -t "wt-$name" 2>/dev/null && echo "tmux session wt-$name killed" || true
+        git -C "$repo" worktree remove "$path"
+        echo "removed $path"
+        echo "(run 'bazel-cleanup --apply' to reclaim its Bazel output_base)"
+        ;;
+    ls)
+        git -C "$repo" worktree list | grep -F "$HOME/work/wt-" || echo "(none)"
+        ;;
+    -h|--help)
+        usage
+        ;;
+    "")
+        usage >&2
+        exit 1
+        ;;
+    *)
+        echo "unknown subcommand: $1" >&2
+        usage >&2
+        exit 1
+        ;;
+esac
