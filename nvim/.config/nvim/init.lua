@@ -375,6 +375,7 @@ require('lazy').setup({
     ---@type wk.Opts
     ---@diagnostic disable-next-line: missing-fields
     opts = {
+      preset = "helix",
       -- delay between pressing a key and opening which-key (milliseconds)
       delay = 0,
       icons = { mappings = vim.g.have_nerd_font },
@@ -387,6 +388,15 @@ require('lazy').setup({
         { 'gr', group = 'LSP Actions', mode = { 'n' } },
       },
     },
+    keys = {
+    {
+      "<leader>?",
+      function()
+        require("which-key").show({ global = false })
+      end,
+      desc = "Buffer Local Keymaps (which-key)",
+    },
+  },
   },
 
   -- NOTE: Plugins can specify dependencies.
