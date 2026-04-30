@@ -7,14 +7,19 @@ set -e
 path="${2:-$HOME/workspaces/memory-vault}"
 name="${1:-vault}"
 
-if tmux has-session -t="$name" 2>/dev/null; then
-    [[ -z "$TMUX" ]] && exec tmux attach -t "$name"
-    exec tmux switch-client -t "$name"
+ensure_window() {
+    local win="$1" cmd="$2"
+    tmux list-windows -t "$name" -F '#W' 2>/dev/null | grep -Fxq "$win" && return
+    tmux new-window -t "$name:" -c "$path" -n "$win" "$cmd"
+}
+
+if ! tmux has-session -t="$name" 2>/dev/null; then
+    tmux new-session -ds "$name" -c "$path" -n notes "nvim ."
 fi
 
-tmux new-session -ds "$name" -c "$path" -n notes "nvim ."
-tmux new-window -t "$name:"  -c "$path" -n shell "zsh"
-tmux new-window -t "$name:"  -c "$path" -n agent "zsh -i -c x"
+ensure_window notes "nvim ."
+ensure_window shell "zsh"
+ensure_window agent "zsh -i -c x"
 tmux select-window -t "$name:notes"
 
 [[ -z "$TMUX" ]] && exec tmux attach -t "$name"
