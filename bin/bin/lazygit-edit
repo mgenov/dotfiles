@@ -1,0 +1,39 @@
+#!/bin/sh
+# Used by lazygit os.edit/os.editAtLine in config.yml. Forwards to the parent
+# nvim's _G.LazygitEdit (defined in nvim/lua/custom/plugins/lazygit.lua),
+# which loads the file in the underlying window and closes the lazygit float.
+#
+# Lazygit's command runner splits on whitespace even when {{filename}} is
+# wrapped in quotes, so a path like "Application Support/..." arrives as
+# multiple positional args. Reconstruct the filename from all args, treating
+# a trailing purely-numeric arg as the line number (only editAtLine appends
+# one).
+
+n=$#
+last=""
+for arg in "$@"; do last="$arg"; done
+
+case "$last" in
+  ''|*[!0-9]*) is_line=0 ;;
+  *) [ "$n" -gt 1 ] && is_line=1 || is_line=0 ;;
+esac
+
+if [ "$is_line" = 1 ]; then
+  line="$last"
+  filename=""
+  i=0
+  for arg in "$@"; do
+    i=$((i+1))
+    [ "$i" -lt "$n" ] || break
+    if [ -z "$filename" ]; then filename="$arg"; else filename="$filename $arg"; fi
+  done
+else
+  line=""
+  filename="$*"
+fi
+
+if [ -n "$line" ]; then
+  exec nvr -c "lua _G.LazygitEdit([[$filename]], [[$line]])"
+else
+  exec nvr -c "lua _G.LazygitEdit([[$filename]])"
+fi

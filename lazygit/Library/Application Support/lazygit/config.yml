@@ -11,3 +11,5 @@ git:
       pager: delta --paging=never
 os:
   editPreset: nvim-remote
+  edit: 'lazygit-edit "{{filename}}"'
+  editAtLine: 'lazygit-edit "{{filename}}" "{{line}}"'
