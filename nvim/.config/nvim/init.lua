@@ -269,7 +269,7 @@ vim.filetype.add {
 -- Avoids depending on `:LspRestart` which is provided by nvim-lspconfig and may not be loaded.
 local function restart_gopls()
   for _, c in ipairs(vim.lsp.get_clients { name = 'gopls' }) do
-    vim.lsp.stop_client(c.id, true)
+    c:stop(true)
   end
   vim.defer_fn(function()
     for _, buf in ipairs(vim.api.nvim_list_bufs()) do
