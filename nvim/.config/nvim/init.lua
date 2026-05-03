@@ -592,6 +592,14 @@ require('lazy').setup({
       -- Shortcut for searching your Neovim configuration files
       vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
     end,
+
+      -- Search in a specific directory
+    vim.keymap.set('n', '<leader>sp', function()
+        local path = vim.fn.input("Search in path: ", "", "dir")
+        require('telescope.builtin').live_grep({
+            search_dirs = {path}
+        })
+    end, { desc = "[S]earch in [P]ath" })
   },
 
   -- LSP Plugins
@@ -755,6 +763,7 @@ require('lazy').setup({
               },
               ['formatting.gofumpt'] = true,
               ['formatting.local'] = 'cloud.clouway.com',
+              ['ui.completion.completionBudget'] = '500ms',
               ['ui.completion.usePlaceholders'] = true,
               ['ui.semanticTokens'] = false,
               ['ui.codelenses'] = {
@@ -963,13 +972,22 @@ require('lazy').setup({
       },
 
       completion = {
+        menu = {
+          draw = {
+            -- We add 'label_description' to the columns list
+            columns = { 
+              { 'label', 'label_description', gap = 1 },
+              { 'kind_icon', 'kind', gap = 1 }
+            },
+          },
+        },
         -- By default, you may press `<c-space>` to show the documentation.
         -- Optionally, set `auto_show = true` to show the documentation after a delay.
-        documentation = { auto_show = false, auto_show_delay_ms = 500 },
+        documentation = { auto_show = true, auto_show_delay_ms = 500 },
       },
 
       sources = {
-        default = { 'lsp', 'path', 'snippets' },
+        default = { 'lsp', 'path', 'snippets', 'buffer' },
       },
 
       snippets = { preset = 'luasnip' },
