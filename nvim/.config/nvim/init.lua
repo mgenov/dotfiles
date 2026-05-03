@@ -381,6 +381,7 @@ require('lazy').setup({
         map('n', '<leader>hb', function()
           gitsigns.blame_line({ full = true })
         end)
+        map('n', '<leader>hp', gitsigns.preview_hunk)
         map('n', '<leader>hs', gitsigns.stage_hunk)
         map('n', '<leader>hr', gitsigns.reset_hunk)
 
