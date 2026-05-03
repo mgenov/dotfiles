@@ -28,6 +28,7 @@ export NVIM_SOCKET="${XDG_RUNTIME_DIR:-$HOME/.cache}/nvim/editor.sock"
 export KUBE_EDITOR="$HOME/bin/nvim-open"
 export EDITOR="$HOME/bin/nvim-open"
 export VISUAL="$HOME/bin/nvim-open"
+export GIT_EDITOR="nvim -u $HOME/.config/nvim/commit.lua"
 
 v() {
   "$HOME/bin/nvim-open" "$@"
