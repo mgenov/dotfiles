@@ -214,6 +214,7 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 vim.keymap.set('i', 'jk', '<Esc>')
+vim.keymap.set("n", "<leader>ee", "oif err != nil {<CR>return err<CR>}<Esc>ki", { desc = "Go: Insert error check" })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
 -- vim.keymap.set("n", "<C-S-h>", "<C-w>H", { desc = "Move window to the left" })
@@ -279,6 +280,8 @@ local function restart_gopls()
     end
   end, 200)
 end
+
+vim.api.nvim_create_user_command('LspRestart', restart_gopls, { desc = 'Restart gopls and re-attach Go buffers' })
 
 -- Run gazelle and refresh gopls so new BUILD targets are picked up immediately
 vim.keymap.set('n', '<leader>bg', function()
@@ -728,6 +731,9 @@ require('lazy').setup({
       if bazel_root then
         local driver = bazel_root .. '/tools/gopackagesdriver.sh'
         if vim.uv.fs_stat(driver) then gopls_env.GOPACKAGESDRIVER = driver end
+        -- Prepend Homebrew's bin so `bazel` resolves to the bazelisk symlink, not
+        -- /usr/local/bin/bazel (which is a raw bazel 9.x and ignores .bazelversion).
+        gopls_env.PATH = '/opt/homebrew/bin:' .. (vim.env.PATH or '')
         -- GOROOT only if the bazel convenience symlink already exists in this checkout
         -- (bazel creates `bazel-<name>` per-worktree on first build; absent in fresh worktrees).
         local goroot = bazel_root .. '/bazel-monorepo/external/rules_go++go_sdk+main___download_0/'
