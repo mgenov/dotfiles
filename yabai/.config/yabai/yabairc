@@ -25,6 +25,7 @@ yabai -m rule --add app="^Finder$" manage=off
 
 # Title these apps
 yabai -m rule --add app="^ghostty$" manage=on
+yabai -m rule --add app="^Arc$" manage=on
 
 yabai -m rule --add app="^qemu-system-aarch64$" title=".*Android Emulator.*" manage=on
 yabai -m rule --add app="^qemu-system-aarch64$" title="^$" manage=off
