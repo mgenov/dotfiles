@@ -4,136 +4,21 @@
             "complex_modifications": {
                 "rules": [
                     {
-                        "description": "Hyper Key (⌃⌥⇧⌘)",
+                        "description": "Caps Lock -> Ctrl (lazy) + Hyper",
                         "manipulators": [
                             {
-                                "description": "Caps Lock -> Hyper Key",
+                                "description": "Caps Lock holds Ctrl lazily and sets hyper variable",
                                 "from": {
                                     "key_code": "caps_lock",
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [
-                                    {
-                                        "set_variable": {
-                                            "name": "hyper",
-                                            "value": 1
-                                        }
-                                    }
+                                    { "set_variable": { "name": "hyper", "value": 1 } },
+                                    { "key_code": "left_control" }
                                 ],
                                 "to_after_key_up": [
-                                    {
-                                        "set_variable": {
-                                            "name": "hyper",
-                                            "value": 0
-                                        }
-                                    }
+                                    { "set_variable": { "name": "hyper", "value": 0 } }
                                 ],
-                                "to_if_alone": [{ "key_code": "escape" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Hyper Key Vim Arrows",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "hyper",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "name": "hyper_sublayer_spacebar",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    },
-                                    {
-                                        "name": "hyper_sublayer_w",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "h",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "left_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "hyper",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "name": "hyper_sublayer_spacebar",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    },
-                                    {
-                                        "name": "hyper_sublayer_w",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "j",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "down_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "hyper",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "name": "hyper_sublayer_spacebar",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    },
-                                    {
-                                        "name": "hyper_sublayer_w",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "k",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "up_arrow" }],
-                                "type": "basic"
-                            },
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "hyper",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "name": "hyper_sublayer_spacebar",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    },
-                                    {
-                                        "name": "hyper_sublayer_w",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "from": {
-                                    "key_code": "l",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "key_code": "right_arrow" }],
                                 "type": "basic"
                             }
                         ]
@@ -291,11 +176,27 @@
                                 },
                                 "to": [{ "shell_command": "open -a 'Rakuten Viber'" }],
                                 "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "hyper_sublayer_spacebar",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "description": "space+n -> new Arc window",
+                                "from": {
+                                    "key_code": "n",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "shell_command": "osascript -e 'tell application \"Arc\" to make new window' && sleep 0.15 && /opt/homebrew/bin/yabai -m window --focus \"$(/opt/homebrew/bin/yabai -m query --windows --space | /usr/bin/jq -r 'map(select(.app == \"Arc\")) | sort_by(.id) | last | .id')\"" }],
+                                "type": "basic"
                             }
                         ]
                     },
                     {
-                        "description": "Hyper Key Window Management (sublayer: w)",
+                        "description": "Hyper Key Window Management (sublayer: ;)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -305,9 +206,9 @@
                                         "value": 1
                                     }
                                 ],
-                                "description": "Toggle Hyper sublayer w",
+                                "description": "Toggle Hyper sublayer ;",
                                 "from": {
-                                    "key_code": "w",
+                                    "key_code": "semicolon",
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [
@@ -507,37 +408,6 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [{ "shell_command": "/Users/mgenov/bin/tm-switch" }],
-                                "type": "basic"
-                            }
-                        ]
-                    },
-                    {
-                        "description": "Hyper Key New Arc Window (n)",
-                        "manipulators": [
-                            {
-                                "conditions": [
-                                    {
-                                        "name": "hyper",
-                                        "type": "variable_if",
-                                        "value": 1
-                                    },
-                                    {
-                                        "name": "hyper_sublayer_spacebar",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    },
-                                    {
-                                        "name": "hyper_sublayer_w",
-                                        "type": "variable_if",
-                                        "value": 0
-                                    }
-                                ],
-                                "description": "Hyper + n -> new Arc window",
-                                "from": {
-                                    "key_code": "n",
-                                    "modifiers": { "optional": ["any"] }
-                                },
-                                "to": [{ "shell_command": "osascript -e 'tell application \"Arc\" to make new window' && sleep 0.15 && /opt/homebrew/bin/yabai -m window --focus \"$(/opt/homebrew/bin/yabai -m query --windows --space | /usr/bin/jq -r 'map(select(.app == \"Arc\")) | sort_by(.id) | last | .id')\"" }],
                                 "type": "basic"
                             }
                         ]
