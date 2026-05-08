@@ -88,7 +88,8 @@ for target in "$@"; do
   tmux send-keys -t "$prev_pane" "kubectl port-forward$global_flags $parsed" Enter
 done
 
-# Even out the right-column panes
+# Shell pane = 80% width, right column = 20% with port-forwards stacked evenly
+tmux set-window-option -t "$shell_pane" main-pane-width "80%"
 tmux select-layout -t "$shell_pane" main-vertical 2>/dev/null || true
 
 # Focus back to the shell pane (left side)
