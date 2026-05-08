@@ -1,3 +1,6 @@
+[flavor]
+dark = "tokyo-night"
+
 [opener]
 edit = [
   { run = '$HOME/bin/nvim-open "$1"', block = false, desc = "Open in Neovim" },
