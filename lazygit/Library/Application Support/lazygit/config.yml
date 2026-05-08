@@ -1,10 +1,27 @@
 gui:
   promptToReturnFromSubprocess: false
   theme:
+    activeBorderColor:
+      - '#82aaff'
+      - bold
+    inactiveBorderColor:
+      - '#545c7e'
+    optionsTextColor:
+      - '#82aaff'
     selectedLineBgColor:
-      - '#3d4f6b'
+      - '#2d3f76'
     selectedRangeBgColor:
-      - '#3d4f6b'
+      - '#2d3f76'
+    cherryPickedCommitBgColor:
+      - '#3d59a1'
+    cherryPickedCommitFgColor:
+      - '#c099ff'
+    unstagedChangesColor:
+      - '#ff757f'
+    defaultFgColor:
+      - '#c8d3f5'
+    searchingActiveBorderColor:
+      - '#ffc777'
 git:
   pagers:
     - colorArg: always
