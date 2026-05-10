@@ -15,6 +15,10 @@ source $ZSH/oh-my-zsh.sh
 # fzf key bindings (Ctrl-R history, Ctrl-T files, Alt-C cd) and completion.
 [[ -o interactive ]] && command -v fzf >/dev/null && source <(fzf --zsh)
 
+# Prefix history search: empty buffer = previous command, typed prefix = previous match.
+bindkey '^P' up-line-or-beginning-search
+bindkey '^N' down-line-or-beginning-search
+
 
 export PATH=/usr/local/sbin:/usr/local/bin:${PATH}
 export PATH="$HOME/bin:$PATH"
