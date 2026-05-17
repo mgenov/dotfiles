@@ -217,6 +217,7 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 vim.keymap.set('i', 'jk', '<Esc>')
+vim.keymap.set('i', 'C-c', '<Esc>')
 vim.keymap.set("n", "<leader>ee", "oif err != nil {<CR>return err<CR>}<Esc>ki", { desc = "Go: Insert error check" })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
@@ -548,6 +549,8 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
       vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = '[G]it [S]tatus' })
+      vim.keymap.set("n", "bs", "<C-^>")
+
 
       -- This runs on LSP attach per buffer (see main LSP attach function in 'neovim/nvim-lspconfig' config for more info,
       -- it is better explained there). This allows easily switching between pickers if you prefer using something else!
