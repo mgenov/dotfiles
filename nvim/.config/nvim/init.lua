@@ -139,6 +139,9 @@ vim.o.timeoutlen = 300
 vim.o.splitright = true
 vim.o.splitbelow = true
 
+
+vim.o.exrc = true
+
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
@@ -282,6 +285,18 @@ local function restart_gopls()
 end
 
 vim.api.nvim_create_user_command('LspRestart', restart_gopls, { desc = 'Restart gopls and re-attach Go buffers' })
+
+-- Open the LSP log file. If it doesn't exist yet (no LSP events logged at the current
+-- log level), nvim opens an empty buffer at the canonical path so it's visible where
+-- logs will land — bump verbosity with `:lua vim.lsp.set_log_level('debug')` to populate.
+vim.api.nvim_create_user_command('LspLog', function()
+  local path = vim.lsp.log.get_filename()
+  if vim.uv.fs_stat(path) then
+    vim.cmd('edit ' .. vim.fn.fnameescape(path))
+  else
+    vim.notify('LSP log not created yet at ' .. path .. '\nRun :lua vim.lsp.set_log_level("debug") to populate.', vim.log.levels.WARN)
+  end
+end, { desc = 'Open the LSP log file' })
 
 -- Run gazelle and refresh gopls so new BUILD targets are picked up immediately
 vim.keymap.set('n', '<leader>bg', function()
@@ -727,6 +742,32 @@ require('lazy').setup({
       -- Used to point gopls at the bazel-aware packages driver.
       local bazel_root = vim.fs.root(vim.uv.cwd() or '.', { 'WORKSPACE', 'WORKSPACE.bazel', 'MODULE.bazel' })
       local gopls_env = {}
+      local gopls_settings = {
+        ['formatting.gofumpt'] = true,
+        ['formatting.local'] = 'cloud.clouway.com',
+        ['ui.completion.completionBudget'] = '500ms',
+        ['ui.completion.usePlaceholders'] = true,
+        ['ui.semanticTokens'] = false,
+        ['ui.codelenses'] = {
+          gc_details = false,
+          generate = false,
+          regenerate_cgo = false,
+          test = false,
+          tidy = false,
+          upgrade_dependency = false,
+          vendor = false,
+        },
+        -- Inlay hints: not configured in helix; leave on for nvim QoL. Toggle off if noisy.
+        hints = {
+          assignVariableTypes = true,
+          compositeLiteralFields = true,
+          compositeLiteralTypes = true,
+          constantValues = true,
+          functionTypeParameters = true,
+          parameterNames = true,
+          rangeVariableTypes = true,
+        },
+      }
       if bazel_root then
         local driver = bazel_root .. '/tools/gopackagesdriver.sh'
         if vim.uv.fs_stat(driver) then gopls_env.GOPACKAGESDRIVER = driver end
@@ -737,6 +778,31 @@ require('lazy').setup({
         -- (bazel creates `bazel-<name>` per-worktree on first build; absent in fresh worktrees).
         local goroot = bazel_root .. '/bazel-monorepo/external/rules_go++go_sdk+main___download_0/'
         if vim.uv.fs_stat(goroot) then gopls_env.GOROOT = goroot end
+
+        -- Bazel-only: mirror .helix/languages.toml so gopls sees the bazel monorepo correctly.
+        -- These settings break non-Bazel projects (directoryFilters with '-' excludes everything),
+        -- so they're scoped to Bazel workspaces only.
+        gopls_settings['build.workspaceFiles'] = {
+          '**/WORKSPACE',
+          '**/WORKSPACE.bazel',
+          '**/MODULE.bazel',
+          '**/BUILD',
+          '**/BUILD.bazel',
+          '**/*.bzl',
+          '**/*.bazel',
+        }
+        gopls_settings['build.directoryFilters'] = {
+          '-',
+          '+apps/accounts',
+          '+apps/clouway',
+          '+apps/politis',
+          '+apps/toll',
+          '+apps/platform',
+          '+accounts',
+          '+fleerp',
+          '+libs/go',
+          '+apis',
+        }
       end
 
       ---@type table<string, vim.lsp.Config>
@@ -744,54 +810,7 @@ require('lazy').setup({
         -- clangd = {},
         gopls = {
           cmd_env = gopls_env,
-          settings = {
-            gopls = {
-              -- Mirror .helix/languages.toml so gopls sees the same view of the bazel monorepo.
-              ['build.workspaceFiles'] = {
-                '**/WORKSPACE',
-                '**/WORKSPACE.bazel',
-                '**/MODULE.bazel',
-                '**/BUILD',
-                '**/BUILD.bazel',
-                '**/*.bzl',
-                '**/*.bazel',
-              },
-              ['build.directoryFilters'] = {
-                '-',
-                '+apps/politis',
-                '+apps/toll',
-                '+apps/platform',
-                '+accounts',
-                '+fleerp',
-                '+libs/go',
-                '+apis',
-              },
-              ['formatting.gofumpt'] = true,
-              ['formatting.local'] = 'cloud.clouway.com',
-              ['ui.completion.completionBudget'] = '500ms',
-              ['ui.completion.usePlaceholders'] = true,
-              ['ui.semanticTokens'] = false,
-              ['ui.codelenses'] = {
-                gc_details = false,
-                generate = false,
-                regenerate_cgo = false,
-                test = false,
-                tidy = false,
-                upgrade_dependency = false,
-                vendor = false,
-              },
-              -- Inlay hints: not configured in helix; leave on for nvim QoL. Toggle off if noisy.
-              hints = {
-                assignVariableTypes = true,
-                compositeLiteralFields = true,
-                compositeLiteralTypes = true,
-                constantValues = true,
-                functionTypeParameters = true,
-                parameterNames = true,
-                rangeVariableTypes = true,
-              },
-            },
-          },
+          settings = { gopls = gopls_settings },
         },
         -- pyright = {},
         -- rust_analyzer = {},
@@ -801,6 +820,11 @@ require('lazy').setup({
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
         ts_ls = {},
+
+        -- Protobuf: protols (pure-Rust LSP). Reads `.protols.toml` at the workspace
+        -- root for `include_paths` so repo-root-relative imports resolve correctly
+        -- in the bazel monorepo.
+        protols = {},
 
         stylua = {}, -- Used to format Lua code
 
@@ -851,6 +875,8 @@ require('lazy').setup({
         -- You can add other tools here that you want Mason to install
         'gofumpt',
         'goimports',
+        'prettier',
+        'eslint_d',
       })
 
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
@@ -884,6 +910,12 @@ require('lazy').setup({
           -- lua = true,
           -- python = true,
           go = true,
+          javascript = true,
+          javascriptreact = true,
+          typescript = true,
+          typescriptreact = true,
+          json = true,
+          jsonc = true,
         }
         if enabled_filetypes[vim.bo[bufnr].filetype] then
           return { timeout_ms = 3000, lsp_format = 'never' }
@@ -896,15 +928,17 @@ require('lazy').setup({
       },
       -- You can also specify external formatters in here.
       formatters_by_ft = {
-        -- rust = { 'rustfmt' },
-        -- Conform can also run multiple formatters sequentially
-        -- python = { "isort", "black" },
-        --
-        -- You can use 'stop_after_first' to run the first available formatter from the list
-        -- javascript = { "prettierd", "prettier", stop_after_first = true },
         -- Go: gopls handles organize-imports via a BufWritePre autocmd (faster + bazel-aware
         -- via gopackagesdriver). conform just runs gofumpt for layout.
         go = { 'gofumpt' },
+        -- JS/TS: prettier first (style), then eslint_d --fix (simple-import-sort, etc.).
+        -- Both resolve to project-local binaries via conform's executable lookup.
+        javascript = { 'prettier', 'eslint_d' },
+        javascriptreact = { 'prettier', 'eslint_d' },
+        typescript = { 'prettier', 'eslint_d' },
+        typescriptreact = { 'prettier', 'eslint_d' },
+        json = { 'prettier' },
+        jsonc = { 'prettier' },
       },
     },
   },
