@@ -193,6 +193,7 @@ vim.diagnostic.config {
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
 vim.keymap.set('n', '<leader>w', '<cmd>write<CR>', { desc = '[W]rite buffer' })
 vim.keymap.set({ 'n', 'i', 'x' }, '<C-s>', '<cmd>write<CR>', { desc = 'Save buffer' })
+vim.keymap.set("x", "<leader>p", [["_dP]])
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -549,7 +550,11 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
       vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = '[G]it [S]tatus' })
-      vim.keymap.set("n", "bs", "<C-^>")
+      vim.keymap.set('n', "bs", "<C-^>")
+      vim.keymap.set('n', '<C-d>', '<C-d>zz')
+      vim.keymap.set('n', '<C-u>', '<C-u>zz')
+      vim.keymap.set('n', '<C-f>', '<C-f>zz')
+      vim.keymap.set('n', '<C-b>', '<C-b>zz')
 
 
       -- This runs on LSP attach per buffer (see main LSP attach function in 'neovim/nvim-lspconfig' config for more info,
@@ -828,6 +833,11 @@ require('lazy').setup({
         -- root for `include_paths` so repo-root-relative imports resolve correctly
         -- in the bazel monorepo.
         protols = {},
+
+        -- Markdown: marksman. Provides goto-def on `[label](file.md)` and
+        -- `[label](#heading)`, find-references (backlinks), heading outline,
+        -- and link-target completion.
+        marksman = {},
 
         stylua = {}, -- Used to format Lua code
 
@@ -1134,7 +1144,7 @@ require('lazy').setup({
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
       -- ensure basic parser are installed
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go', 'gomod', 'gowork', 'gosum', 'starlark', 'proto' }
+      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go', 'gomod', 'gowork', 'gosum', 'starlark', 'proto', 'yaml' }
       require('nvim-treesitter').install(parsers)
 
       ---@param buf integer

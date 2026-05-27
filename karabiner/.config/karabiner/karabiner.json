@@ -69,7 +69,7 @@
                                     "key_code": "j",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "shell_command": "open -a '/Applications/kitty.app'" }],
+                                "to": [{ "shell_command": "osascript -e 'tell application \"kitty\" to activate'" }],
                                 "type": "basic"
                             },
                             {
@@ -174,7 +174,7 @@
                                     "key_code": "v",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "shell_command": "open -a 'Rakuten Viber'" }],
+                                "to": [{ "shell_command": "open -a 'Viber'" }],
                                 "type": "basic"
                             },
                             {
@@ -185,12 +185,12 @@
                                         "value": 1
                                     }
                                 ],
-                                "description": "space+n -> new Arc window",
+                                "description": "space+n -> new Arc window (opens on Arc's space)",
                                 "from": {
                                     "key_code": "n",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "shell_command": "osascript -e 'tell application \"Arc\" to make new window' && sleep 0.15 && /opt/homebrew/bin/yabai -m window --focus \"$(/opt/homebrew/bin/yabai -m query --windows --space | /usr/bin/jq -r 'map(select(.app == \"Arc\")) | sort_by(.id) | last | .id')\"" }],
+                                "to": [{ "shell_command": "osascript -e 'tell application \"Arc\" to make new window'" }],
                                 "type": "basic"
                             }
                         ]
