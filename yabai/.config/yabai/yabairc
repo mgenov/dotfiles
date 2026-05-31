@@ -22,6 +22,7 @@ yabai -m signal --add event=window_destroyed action="yabai -m query --windows --
 # Don't tile these apps
 yabai -m rule --add app="^System Preferences$" manage=off
 yabai -m rule --add app="^Finder$" manage=off
+yabai -m rule --add app="^Spotify$" manage=off   # floating; Cmd+H да го скриеш
 
 # Title these apps
 yabai -m rule --add app="^ghostty$" manage=on
