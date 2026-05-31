@@ -4,7 +4,7 @@ return {
   cmd = { 'LazyGit', 'LazyGitCurrentFile', 'LazyGitFilter', 'LazyGitFilterCurrentFile' },
   dependencies = { 'nvim-lua/plenary.nvim' },
   keys = {
-    { '<C-g>', '<cmd>LazyGit<cr>', desc = 'LazyGit' },
+    { "<leader>lg", "<cmd>LazyGit<cr>", desc = "LazyGit" }
   },
   init = function()
     -- Called from lazygit's edit command (see lazygit/config.yml).
