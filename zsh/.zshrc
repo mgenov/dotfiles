@@ -10,16 +10,10 @@ ZSH_THEME="cloud"
 plugins=(git fzf-tab zsh-nvm zsh-autosuggestions zsh-syntax-highlighting)
 
 fpath=($HOME/bin $fpath)
-source $ZSH/oh-my-zsh.sh
 
-# fzf key bindings (Ctrl-R history, Ctrl-T files, Alt-C cd) and completion.
-[[ -o interactive ]] && command -v fzf >/dev/null && source <(fzf --zsh)
-
-# Prefix history search: empty buffer = previous command, typed prefix = previous match.
-bindkey '^P' up-line-or-beginning-search
-bindkey '^N' down-line-or-beginning-search
-
-
+# PATH/env must be set BEFORE oh-my-zsh (and its zsh-nvm plugin) load. nvm's
+# auto-`use default` prepends its bin during plugin load; keeping these exports
+# above ensures nvm prepends LAST and wins over the system node in /usr/local/bin.
 export PATH=/usr/local/sbin:/usr/local/bin:${PATH}
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
@@ -43,6 +37,29 @@ export PATH="$HOME/.yarn/bin:$PATH"
 export PATH="./node_modules/.bin:$PATH"
 export PATH="/opt/homebrew/opt/mongodb-community@5.0/bin:$PATH"
 
+source $ZSH/oh-my-zsh.sh
+
+# fzf key bindings (Ctrl-R history, Ctrl-T files, Alt-C cd) and completion.
+[[ -o interactive ]] && command -v fzf >/dev/null && source <(fzf --zsh)
+
+# Prefix history search: empty buffer = previous command, typed prefix = previous match.
+bindkey '^P' up-line-or-beginning-search
+bindkey '^N' down-line-or-beginning-search
+
+# Ctrl-Z toggles in/out of a suspended job (e.g. nvim): empty prompt -> `fg`,
+# typed prompt -> stash the line and clear, restored on return.
+fancy-ctrl-z () {
+  if [[ $#BUFFER -eq 0 ]]; then
+    BUFFER="fg"
+    zle accept-line
+  else
+    zle push-input
+    zle clear-screen
+  fi
+}
+zle -N fancy-ctrl-z
+bindkey '^Z' fancy-ctrl-z
+
 alias gs=git-spice
 eval "$(git-spice shell completion zsh)"
 
@@ -52,6 +69,7 @@ if type nvim > /dev/null 2>&1; then
 fi
 alias x='claude --dangerously-skip-permissions'
 alias cc='claude'
+alias c='clear'
 alias ls='ls -G'
 alias ll='ls -lG'
 alias duh='du -csh'
@@ -91,7 +109,9 @@ function checkpl() {
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
-# nvm is loaded lazily via the zsh-nvm plugin (NVM_LAZY=true by default).
+# nvm is loaded eagerly via the zsh-nvm plugin during `source oh-my-zsh.sh`
+# above; it auto-runs `nvm use default`. PATH/env exports are kept above that
+# source so the default node bin stays ahead of /usr/local/bin.
 #compdef gt
 ###-begin-gt-completions-###
 #
