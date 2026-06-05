@@ -132,7 +132,7 @@ vim.keymap.set('n', '<C-l>', '<C-w><C-l>', { desc = 'Move focus to the right win
 vim.keymap.set('n', '<C-j>', '<C-w><C-j>', { desc = 'Move focus to the lower window' })
 vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 vim.keymap.set('i', 'jk', '<Esc>')
-vim.keymap.set('i', 'C-c', '<Esc>')
+vim.keymap.set('i', '<C-c>', '<Esc>')
 vim.keymap.set("n", "<leader>ee", "oif err != nil {<CR>return err<CR>}<Esc>ki", { desc = "Go: Insert error check" })
 
 -- NOTE: Some terminals have colliding keymaps or are not able to send distinct keycodes
