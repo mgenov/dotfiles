@@ -11,3 +11,5 @@ yazi/.config/yazi/cache/
 
 # zsh local overrides (secrets, internal hostnames)
 zsh/.zshrc.local
+
+.claude
