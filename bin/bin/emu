@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# emu — launch the Android emulator, detached. Default AVD: Pixel_5.
+# Single source of truth for both the CLI (`emu [avd]`) and Karabiner
+# (Hyper-space e). Floats under yabai (see yabai/.config/yabai/yabairc) to
+# avoid the GPU-surface flashing that managing/resizing the window causes.
+set -e
+
+avd="${1:-Pixel_5}"
+sdk="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-$HOME/development/android-sdk-macosx}}"
+emulator="$sdk/emulator/emulator"
+
+# Already running? Don't spawn a second instance — instead raise it to the
+# front (and, via AppleSpacesSwitchOnActivate, jump to its space), the way
+# `open -a` does for a normal app. yabai --focus alone is unreliable here
+# without the scripting addition, so use the same System Events activate that
+# kitty/IntelliJ use for non-Cocoa windows.
+if pgrep -f qemu-system-aarch64 >/dev/null 2>&1; then
+    osascript -e 'tell application "System Events" to set frontmost of process "qemu-system-aarch64" to true' >/dev/null 2>&1
+    exit 0
+fi
+
+nohup "$emulator" -avd "$avd" >/dev/null 2>&1 &

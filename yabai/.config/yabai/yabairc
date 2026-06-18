@@ -28,5 +28,24 @@ yabai -m rule --add app="^Spotify$" manage=off   # floating; Cmd+H да го с�
 yabai -m rule --add app="^ghostty$" manage=on
 yabai -m rule --add app="^Arc$" manage=on
 
-yabai -m rule --add app="^qemu-system-aarch64$" title=".*Android Emulator.*" manage=on
-yabai -m rule --add app="^qemu-system-aarch64$" title="^$" manage=off
+# Android emulator: keep it FLOATING. The emulator renders into a hardware-
+# accelerated Metal/OpenGL surface; when yabai manages it, every tile/move/
+# resize repositions that GPU surface and it fails to repaint cleanly -> the
+# partial flashing that only a show/hide (full redraw) clears. Floating means
+# yabai never resizes/moves it, so it never flashes. Launch via `emu` (bin/emu).
+yabai -m rule --add app="^qemu-system-aarch64$" manage=off
+
+# JetBrains dialogs (Merge, Commit, Settings, Find, ...) are top-level Swing
+# windows that report as AXStandardWindow — identical to the main editor — so
+# yabai tiles them. They can't be told apart by app/role/subrole, only by title:
+# editor windows always contain the " – " (en-dash) project/file separator; the
+# transient dialogs never do. Float anything that isn't a main editor window.
+yabai -m signal --add app="^(IntelliJ IDEA|Android Studio)$" event=window_created \
+  action='yabai -m query --windows --window $YABAI_WINDOW_ID | jq -e "select(.title | test(\" – \") | not) | .id" >/dev/null 2>&1 && yabai -m window $YABAI_WINDOW_ID --toggle float'
+
+# The signal above only sees windows created AFTER it registers. On a yabai
+# restart, dialogs that are already open get re-tiled — so sweep them once on
+# load: float any existing JetBrains window that isn't a main editor window.
+yabai -m query --windows \
+  | jq -r '.[] | select((.app|test("^(IntelliJ IDEA|Android Studio)$")) and (.["is-floating"]|not) and (.title|test(" – ")|not)) | .id' \
+  | while read -r wid; do yabai -m window "$wid" --toggle float; done
