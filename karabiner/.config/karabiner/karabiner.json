@@ -95,6 +95,22 @@
                                         "value": 1
                                     }
                                 ],
+                                "description": "space+f -> toggle zoom-fullscreen (maximize focused window without leaving the tree)",
+                                "from": {
+                                    "key_code": "f",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "shell_command": "/opt/homebrew/bin/yabai -m window --toggle zoom-fullscreen" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "hyper_sublayer_spacebar",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
                                 "from": {
                                     "key_code": "o",
                                     "modifiers": { "optional": ["any"] }
@@ -191,6 +207,22 @@
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [{ "shell_command": "osascript -e 'tell application \"Arc\" to make new window'" }],
+                                "type": "basic"
+                            },
+                            {
+                                "conditions": [
+                                    {
+                                        "name": "hyper_sublayer_spacebar",
+                                        "type": "variable_if",
+                                        "value": 1
+                                    }
+                                ],
+                                "description": "space+e -> launch the Android emulator (Pixel_5), detached",
+                                "from": {
+                                    "key_code": "e",
+                                    "modifiers": { "optional": ["any"] }
+                                },
+                                "to": [{ "shell_command": "/Users/mgenov/bin/emu" }],
                                 "type": "basic"
                             }
                         ]
