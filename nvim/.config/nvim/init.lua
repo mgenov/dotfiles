@@ -719,6 +719,7 @@ require('lazy').setup({
           '+apps/clouway',
           '+apps/politis',
           '+apps/toll',
+          '+apps/fleerp',
           '+apps/platform',
           '+accounts',
           '+fleerp',
