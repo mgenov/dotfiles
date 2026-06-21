@@ -669,7 +669,12 @@ require('lazy').setup({
         ['formatting.local'] = 'cloud.clouway.com',
         ['ui.completion.completionBudget'] = '500ms',
         ['ui.completion.usePlaceholders'] = true,
-        ['ui.semanticTokens'] = false,
+        -- Bare key (not 'ui.semanticTokens'): nvim-lspconfig's bundled gopls
+        -- config sets `semanticTokens = true` by default. The dotted spelling
+        -- is a *different* key that gopls flattens to the same option, so both
+        -- reach gopls -> "duplicate value for semanticTokens". Using the bare
+        -- key overrides lspconfig's default instead of colliding with it.
+        semanticTokens = false,
         ['ui.codelenses'] = {
           gc_details = false,
           generate = false,
