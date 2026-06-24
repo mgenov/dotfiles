@@ -10,8 +10,12 @@ yabai -m config bottom_padding 10
 yabai -m config left_padding 10
 yabai -m config right_padding 10
 
-# Focus follows mouse
-yabai -m config focus_follows_mouse autofocus
+# Focus follows mouse — OFF. With it on (autofocus), moving the cursor over the
+# main Arc window stole focus from Arc extension pop-outs (Gmail compose, etc.),
+# and the browser auto-closes those on blur. yabai has no per-app FFM, so the
+# choice is binary; keeping pop-outs usable wins. Flip back to 'autofocus' here
+# if you'd rather have hover-focus and live without the pop-outs.
+yabai -m config focus_follows_mouse off
 
 # When a window is destroyed AND focus is lost, focus the most recently used window.
 # The query guard prevents firing on transient system popups (e.g. input source HUD
@@ -48,4 +52,18 @@ yabai -m signal --add app="^(IntelliJ IDEA|Android Studio)$" event=window_create
 # load: float any existing JetBrains window that isn't a main editor window.
 yabai -m query --windows \
   | jq -r '.[] | select((.app|test("^(IntelliJ IDEA|Android Studio)$")) and (.["is-floating"]|not) and (.title|test(" – ")|not)) | .id' \
+  | while read -r wid; do yabai -m window "$wid" --toggle float; done
+
+# Arc extension pop-outs (Gmail compose, etc.) open as separate top-level
+# AXStandardWindows but are FIXED-SIZE — can-resize:false — whereas real browse
+# windows are resizable. yabai tiles them anyway; then focus_follows_mouse
+# yanks focus to the main window the moment the cursor crosses it, and the
+# browser auto-closes the pop-out on blur. Float any non-resizable Arc window
+# so it stays on top, out of the BSP tree, and reachable without crossing tiles.
+yabai -m signal --add app="^Arc$" event=window_created \
+  action='yabai -m query --windows --window $YABAI_WINDOW_ID | jq -e "select(.\"can-resize\" == false) | .id" >/dev/null 2>&1 && yabai -m window $YABAI_WINDOW_ID --toggle float'
+
+# Sweep already-open Arc pop-outs on load (the signal only sees future windows).
+yabai -m query --windows \
+  | jq -r '.[] | select((.app=="Arc") and (.["is-floating"]|not) and (.["can-resize"]|not)) | .id' \
   | while read -r wid; do yabai -m window "$wid" --toggle float; done
