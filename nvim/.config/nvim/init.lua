@@ -464,7 +464,6 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
       vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = '[G]it [S]tatus' })
-      vim.keymap.set('n', "bs", "<C-^>")
       vim.keymap.set('n', '<C-d>', '<C-d>zz')
       vim.keymap.set('n', '<C-u>', '<C-u>zz')
       vim.keymap.set('n', '<C-f>', '<C-f>zz')
