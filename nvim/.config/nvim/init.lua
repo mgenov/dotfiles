@@ -741,6 +741,7 @@ require('lazy').setup({
         },
         -- pyright = {},
         rust_analyzer = {},
+        zls = {}, -- Zig language server
         --
         -- Some languages (like typescript) have entire language plugins that can be useful:
         --    https://github.com/pmizio/typescript-tools.nvim
@@ -841,6 +842,7 @@ require('lazy').setup({
         local enabled_filetypes = {
           -- lua = true,
           -- python = true,
+          zig = true,
           go = true,
           javascript = true,
           javascriptreact = true,
@@ -863,6 +865,7 @@ require('lazy').setup({
         -- Go: gopls handles organize-imports via a BufWritePre autocmd (faster + bazel-aware
         -- via gopackagesdriver). conform just runs gofumpt for layout.
         go = { 'gofumpt' },
+        zig = { 'zig fmt' },
         -- JS/TS: prettier first (style), then eslint_d --fix (simple-import-sort, etc.).
         -- Both resolve to project-local binaries via conform's executable lookup.
         javascript = { 'prettier', 'eslint_d' },
