@@ -7,6 +7,13 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = false
 
+-- Disable the python3 provider. No plugins here use pynvim, and probing for the
+-- provider host costs ~1s the first time it's triggered in a session. Opening a
+-- Bazel file hits it: Neovim's built-in bzl ftplugin/indent source the Python
+-- ones (Starlark is Python-flavored), which probe the provider — making the first
+-- BUILD/.bzl open sluggish. Disabling it keeps the vimscript indent/comment logic.
+vim.g.loaded_python3_provider = 0
+
 -- [[ Setting options ]]
 -- See `:help vim.o`
 -- NOTE: You can change these options as you wish!
@@ -167,6 +174,16 @@ vim.api.nvim_create_autocmd('BufWritePre', {
         if action.edit then vim.lsp.util.apply_workspace_edit(action.edit, 'utf-8') end
       end
     end
+  end,
+})
+
+-- Go: continue the `//` comment leader when pressing <Enter> in insert mode
+-- (formatoptions `r`; Neovim's default omits it, so Go otherwise doesn't).
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('go-comment-continue', { clear = true }),
+  pattern = 'go',
+  callback = function()
+    vim.opt_local.formatoptions:append 'r'
   end,
 })
 
@@ -935,6 +952,12 @@ require('lazy').setup({
         -- See :h blink-cmp-config-keymap for defining your own keymap
         preset = 'default',
 
+        -- With auto-show off, make the ins-completion keys open the menu too, so
+        -- <C-n> works from muscle memory instead of only <C-space>. `show` returns
+        -- false when the menu is already open, so the next action in the list runs.
+        ['<C-n>'] = { 'show', 'select_next', 'fallback_to_mappings' },
+        ['<C-p>'] = { 'show', 'select_prev', 'fallback_to_mappings' },
+
         -- For more advanced Luasnip keymaps (e.g. selecting choice nodes, expansion) see:
         --    https://github.com/L3MON4D3/LuaSnip?tab=readme-ov-file#keymaps
       },
@@ -946,6 +969,18 @@ require('lazy').setup({
       },
 
       completion = {
+        -- Manual-trigger only: the menu never appears on its own, you ask for it
+        -- with <C-space> (or <C-n>/<C-p>). Keeps typing quiet and makes <CR>/<Tab>
+        -- unambiguous, at the cost of having to remember to ask.
+        trigger = {
+          show_on_keyword = false, -- don't pop up while typing a word
+          show_on_trigger_character = false, -- ...nor after `.`, `:`, `->`
+          show_on_insert_on_trigger_character = false, -- ...nor when entering insert right after one
+          show_on_accept_on_trigger_character = false, -- ...nor after accepting an item ending in one
+          -- Left at the default `true`: still asks the LSP in the background on
+          -- InsertEnter, so the manual <C-space> renders instantly.
+          prefetch_on_insert = true,
+        },
         menu = {
           draw = {
             -- We add 'label_description' to the columns list
