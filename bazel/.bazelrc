@@ -4,3 +4,6 @@
 
 build --disk_cache=/Users/mgenov/.cache/bazel-disk-cache
 build --repository_cache=/Users/mgenov/.cache/bazel-repo-cache
+
+build --experimental_disk_cache_gc_max_size=50G
+build --experimental_disk_cache_gc_max_age=30d
