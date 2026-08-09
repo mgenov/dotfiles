@@ -160,6 +160,16 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   callback = function() vim.hl.on_yank() end,
 })
 
+-- Quickfix always spans the full width at the bottom, even with vertical
+-- splits open (without this it opens inside the current split's column).
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('quickfix-bottom', { clear = true }),
+  pattern = 'qf',
+  callback = function()
+    vim.cmd.wincmd 'J'
+  end,
+})
+
 -- Run gopls source.organizeImports on Go save (replaces the slow goimports CLI; uses
 -- gopls's bazel-aware index and honors `formatting.local`).
 vim.api.nvim_create_autocmd('BufWritePre', {
