@@ -39,6 +39,38 @@ export PATH="/opt/homebrew/opt/mongodb-community@5.0/bin:$PATH"
 
 source $ZSH/oh-my-zsh.sh
 
+# jj keeps git's HEAD detached at `@-`, so the cloud theme's git_prompt_info
+# degrades to a bare SHA and parse_git_dirty stays lit permanently (the working
+# copy always holds `@`'s content, which git reads as uncommitted). Report jj's
+# own identity instead: nearest bookmark, change id, conflict/empty state.
+#
+# --ignore-working-copy keeps prompt rendering read-only. Without it every redraw
+# snapshots the working copy into a new commit — slow, and it contends for the
+# repo lock against concurrent jj commands. The cost is staleness: edits made
+# outside a jj command aren't reflected until the next one.
+jj_prompt_info() {
+  local id bm
+  id=$(jj log --no-graph --ignore-working-copy --color never -r @ \
+        -T 'separate(" ", change_id.shortest(8), if(conflict, "×"), if(empty, "∅"))' \
+        2>/dev/null) || return 1
+
+  # `@` is usually an empty tip above the bookmark, so ask for the closest
+  # bookmarked ancestor. Empty when the stack has no bookmark yet.
+  bm=$(jj log --no-graph --ignore-working-copy --color never \
+        -r 'heads(::@ & bookmarks())' -T 'local_bookmarks.join(",")' 2>/dev/null)
+
+  echo "%{$fg[green]%}[%{$fg[cyan]%}${bm:-no-bookmark}%{$fg[green]%}|%{$fg[cyan]%}${id}%{$fg[green]%}]%{$reset_color%}"
+}
+
+# Plain-git repos keep the stock oh-my-zsh segment.
+jj_or_git_prompt_info() { jj_prompt_info || git_prompt_info }
+
+PROMPT='%{$fg_bold[cyan]%}$ZSH_THEME_CLOUD_PREFIX %{$fg_bold[green]%}%p %{$fg[green]%}%c %{$fg_bold[cyan]%}$(jj_or_git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
+
+autoload -U compinit
+compinit
+source <(jj util completion zsh)
+
 # fzf key bindings (Ctrl-R history, Ctrl-T files, Alt-C cd) and completion.
 [[ -o interactive ]] && command -v fzf >/dev/null && source <(fzf --zsh)
 
