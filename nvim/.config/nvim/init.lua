@@ -286,70 +286,38 @@ require('lazy').setup({
     -- Alternatively, use `config = function() ... end` for full control over the configuration.
   -- If you prefer to call `setup` explicitly, use:
   --    {
-  --        'lewis6991/gitsigns.nvim',
+  --        'algmyr/vcsigns.nvim',
   --        config = function()
-  --            require('gitsigns').setup({
-  --                -- Your gitsigns configuration here
+  --            require('vcsigns').setup({
+  --                -- Your vcsigns configuration here
   --            })
   --        end,
   --    }
   --
   -- Here is a more advanced example where we pass configuration
-  -- options to `gitsigns.nvim`.
+  -- options to `vcsigns.nvim`.
   --
-  -- See `:help gitsigns` to understand what the configuration keys do
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
-    'lewis6991/gitsigns.nvim',
-    ---@module 'gitsigns'
-    ---@type Gitsigns.Config
-    ---@diagnostic disable-next-line: missing-fields
-    opts = {
-      signs = {
-        add = { text = '+' }, ---@diagnostic disable-line: missing-fields
-        change = { text = '~' }, ---@diagnostic disable-line: missing-fields
-        delete = { text = '_' }, ---@diagnostic disable-line: missing-fields
-        topdelete = { text = '‾' }, ---@diagnostic disable-line: missing-fields
-        changedelete = { text = '~' }, ---@diagnostic disable-line: missing-fields
-      },
-      current_line_blame = false,
-      on_attach = function(bufnr)
-        local gitsigns = require('gitsigns')
-
-        local function map(mode, l, r, opts)
-          opts = opts or {}
-          opts.buffer = bufnr
-          vim.keymap.set(mode, l, r, opts)
-        end
-
-        -- Navigation
-        map('n', ']c', function()
-          if vim.wo.diff then
-            vim.cmd.normal({ ']c', bang = true })
-          else
-            gitsigns.nav_hunk('next')
-          end
-        end, { desc = 'Jump to next git [c]hange' })
-
-        map('n', '[c', function()
-          if vim.wo.diff then
-            vim.cmd.normal({ '[c', bang = true })
-          else
-            gitsigns.nav_hunk('prev')
-          end
-        end, { desc = 'Jump to previous git [c]hange' })
-
-        map('n', '<leader>hb', function()
-          gitsigns.blame_line({ full = true })
-        end)
-        map('n', '<leader>hp', gitsigns.preview_hunk)
-        map('n', '<leader>hs', gitsigns.stage_hunk)
-        map('n', '<leader>hr', gitsigns.reset_hunk)
-
-        -- Toggles
-        map('n', '<leader>tb', gitsigns.toggle_current_line_blame)
-        map('n', '<leader>tw', gitsigns.toggle_word_diff)
-    end,
+  -- See `:help vcsigns` to understand what the configuration keys do
+  { -- VCS-agnostic gutter signs and hunk operations (Git, jj, Mercurial)
+    'algmyr/vcsigns.nvim',
+    dependencies = {
+      'algmyr/vclib.nvim',
+      'lewis6991/async.nvim',
     },
+    config = function()
+      require('vcsigns').setup {
+        -- Compare the working copy with its parent, the usual jj workflow.
+        target_commit = 1,
+      }
+
+      local actions = require('vcsigns.actions')
+      vim.keymap.set('n', ']c', function() actions.hunk_next(0, vim.v.count1) end, { desc = 'Next VCS hunk' })
+      vim.keymap.set('n', '[c', function() actions.hunk_prev(0, vim.v.count1) end, { desc = 'Previous VCS hunk' })
+      vim.keymap.set('n', '<leader>hp', function() actions.toggle_hunk_diff(0) end, { desc = 'Preview VCS hunk' })
+      vim.keymap.set('n', '<leader>hu', function() actions.hunk_undo(0) end, { desc = 'Undo VCS hunk' })
+      vim.keymap.set('v', '<leader>hu', function() actions.hunk_undo(0) end, { desc = 'Undo VCS hunks' })
+      vim.keymap.set('n', '<leader>hv', function() actions.diffview(0) end, { desc = 'View VCS diff' })
+    end,
   },
 
   -- NOTE: Plugins can also be configured to run Lua code when they are loaded.
@@ -382,7 +350,7 @@ require('lazy').setup({
       spec = {
         { '<leader>s', group = '[S]earch', mode = { 'n', 'v' } },
         { '<leader>t', group = '[T]oggle' },
-        { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } }, -- Enable gitsigns recommended keymaps first
+        { '<leader>h', group = 'VCS [H]unk', mode = { 'n', 'v' } }, -- Enable vcsigns mappings first
         { 'gr', group = 'LSP Actions', mode = { 'n' } },
       },
     },
@@ -419,6 +387,7 @@ require('lazy').setup({
     event = 'VimEnter',
     dependencies = {
       'nvim-lua/plenary.nvim',
+      'zschreur/telescope-jj.nvim',
       { -- If encountering errors, see telescope-fzf-native README for installation instructions
         'nvim-telescope/telescope-fzf-native.nvim',
 
@@ -476,6 +445,7 @@ require('lazy').setup({
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
       pcall(require('telescope').load_extension, 'ui-select')
+      pcall(require('telescope').load_extension, 'jj')
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
@@ -490,7 +460,14 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader>sc', builtin.commands, { desc = '[S]earch [C]ommands' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
-      vim.keymap.set('n', '<leader>gs', builtin.git_status, { desc = '[G]it [S]tatus' })
+      vim.keymap.set('n', '<leader>gs', function()
+        local jj_root = vim.system({ 'jj', 'root' }, { text = true }):wait()
+        if jj_root.code == 0 then
+          require('telescope').extensions.jj.diff()
+        else
+          builtin.git_status()
+        end
+      end, { desc = 'VCS [S]tatus' })
       vim.keymap.set('n', '<C-d>', '<C-d>zz')
       vim.keymap.set('n', '<C-u>', '<C-u>zz')
       vim.keymap.set('n', '<C-f>', '<C-f>zz')
@@ -1174,7 +1151,7 @@ require('lazy').setup({
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommended keymaps
+  -- require 'kickstart.plugins.gitsigns', -- legacy Git-only example, not loaded
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
