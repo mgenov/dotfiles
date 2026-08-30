@@ -81,12 +81,12 @@ Guarded by `zsh/.zshrc.local` in `.gitignore` as a safety net.
 - **Neovim** — current modal editor config with built-in LSP and Go/Bazel shortcuts
 - **tmux** — terminal multiplexer; `prefix` is `C-a`, `prefix f` runs `tmux-sessionizer`
 - **Yazi** — file manager, opens files in the running Neovim instance
-- **LazyGit** — git TUI, opens files in the running Neovim instance
+- **LazyGit** — standalone Git TUI
 
 ## Notes
 
-- `nvim-session` starts Neovim with a fixed RPC socket so Yazi and LazyGit can reuse the running editor.
-- Yazi and LazyGit call `nvim-open`, which opens files in the active Neovim server when available.
+- `nvim-session` starts Neovim with a fixed RPC socket so Yazi can reuse the running editor.
+- Yazi calls `nvim-open`, which opens files in the active Neovim server when available.
 
 ## Unstowing
 
