@@ -42,24 +42,50 @@ source $ZSH/oh-my-zsh.sh
 # jj keeps git's HEAD detached at `@-`, so the cloud theme's git_prompt_info
 # degrades to a bare SHA and parse_git_dirty stays lit permanently (the working
 # copy always holds `@`'s content, which git reads as uncommitted). Report jj's
-# own identity instead: nearest bookmark, change id, conflict/empty state.
+# own identity instead: `@`'s change id, its position, and its state flags.
+#
+# Position is `›N` (N changes between trunk() and `@`) on a linear stack, or `⑂N`
+# (N merged parents) when `@` is a merge, where a distance from trunk says little
+# about a megamerge assembled from N independent stacks.
+#
+# Deliberately no bookmark and no description: both are unbounded in length, and
+# a megamerge carries one bookmark per merged parent, so either one turns the
+# prompt into a wall of text exactly when the history is most tangled. Everything
+# rendered here is a change id plus a handful of characters.
 #
 # --ignore-working-copy keeps prompt rendering read-only. Without it every redraw
 # snapshots the working copy into a new commit — slow, and it contends for the
 # repo lock against concurrent jj commands. The cost is staleness: edits made
 # outside a jj command aren't reflected until the next one.
 jj_prompt_info() {
-  local id bm
-  id=$(jj log --no-graph --ignore-working-copy --color never -r @ \
-        -T 'separate(" ", change_id.shortest(8), if(conflict, "×"), if(empty, "∅"))' \
-        2>/dev/null) || return 1
+  local out wc counted id nparents flags cid cflags parents pos
+  local -i dist=0
 
-  # `@` is usually an empty tip above the bookmark, so ask for the closest
-  # bookmarked ancestor. Empty when the stack has no bookmark yet.
-  bm=$(jj log --no-graph --ignore-working-copy --color never \
-        -r 'heads(::@ & bookmarks())' -T 'local_bookmarks.join(",")' 2>/dev/null)
+  # `@` is unioned in because it drops out of trunk()..@ when it *is* trunk. The
+  # flags column is last: an empty field mid-line gets swallowed by read's IFS
+  # handling and shifts every column after it.
+  out=$(jj log --no-graph --ignore-working-copy --color never \
+         -r '@ | (trunk()..@)' \
+         -T 'if(current_working_copy, "@", "-") ++ "\t"
+             ++ if(self.contained_in("trunk()..@"), "d", "-") ++ "\t"
+             ++ change_id.shortest(8) ++ "\t"
+             ++ parents.len() ++ "\t"
+             ++ separate(" ", if(conflict, "×"), if(divergent, "≠"), if(empty, "∅"))
+             ++ "\n"' 2>/dev/null) || return 1
 
-  echo "%{$fg[green]%}[%{$fg[cyan]%}${bm:-no-bookmark}%{$fg[green]%}|%{$fg[cyan]%}${id}%{$fg[green]%}]%{$reset_color%}"
+  while IFS=$'\t' read -r wc counted id nparents flags; do
+    [[ $counted == d ]] && (( dist++ ))
+    [[ $wc == '@' ]] && { cid=$id; parents=$nparents; cflags=$flags }
+  done <<< "$out"
+
+  if (( parents > 1 )); then
+    pos="⑂${parents}"
+  elif (( dist > 0 )); then
+    pos="›${dist}"
+  fi
+
+  local -a seg=($cid $pos $cflags)
+  echo "%{$fg[green]%}[%{$fg[cyan]%}${(j: :)${seg:#}}%{$fg[green]%}]%{$reset_color%}"
 }
 
 # Plain-git repos keep the stock oh-my-zsh segment.
