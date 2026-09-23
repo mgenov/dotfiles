@@ -63,6 +63,8 @@ vim.o.splitbelow = true
 
 vim.o.exrc = true
 
+require('notes').setup { path = '~/work/notes' }
+
 -- Sets how neovim will display certain whitespace characters in the editor.
 --  See `:help 'list'`
 --  and `:help 'listchars'`
