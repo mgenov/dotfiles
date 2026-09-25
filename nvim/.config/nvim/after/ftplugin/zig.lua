@@ -1,20 +1,17 @@
--- Build output goes into a terminal split under the code window. Pressing q
--- there closes it and returns to the code.
-local function zig_term(args)
-  vim.cmd('botright split | resize 15 | terminal zig ' .. args)
-  vim.cmd 'normal! G'
-  vim.keymap.set('n', 'q', '<cmd>close<CR>', { buffer = true, desc = 'Close build output' })
-end
+local buildterm = require 'buildterm'
 
--- minimal error style leaves out the build-step tree and command lines, so
--- the split shows the compiler errors themselves.
-vim.opt_local.makeprg = 'zig build --error-style minimal'
+-- minimal error style leaves out the command lines, and --summary none drops
+-- the "Build Summary" step tree printed after the errors. What is left is
+-- the compiler error itself, which then fits the small output split.
+local quiet = '--error-style minimal --summary none'
+
+vim.opt_local.makeprg = 'zig build ' .. quiet
 
 -- Overrides the global <C-b> (page up + center) in Zig buffers only.
 vim.keymap.set('n', '<C-b>', function()
-  zig_term 'build --error-style minimal'
+  buildterm.run('zig build ' .. quiet, { status = false })
 end, { buffer = true, desc = 'Zig build' })
 
 vim.keymap.set('n', '<leader>x', function()
-  zig_term 'build run'
+  buildterm.run('zig build run ' .. quiet, { status = false })
 end, { buffer = true, desc = 'Zig build run' })

@@ -73,10 +73,43 @@ local function bazel_quickfix(subcommand)
   vim.cmd 'cwindow'
 end
 
+-- Flags that cut bazel's output down to errors only, so the result fits a
+-- small split: no progress, INFO or WARNING lines, and no "Target ... up to
+-- date" listing. A clean build prints nothing; buildterm adds the OK line.
+local quiet_flags = table.concat({
+  '--curses=no',
+  '--color=yes',
+  '--noshow_progress',
+  '--ui_event_filters=-info,-debug,-warning',
+  '--show_result=0',
+  '--noannounce_rc',
+}, ' ')
+
+-- .bazelrc sets --test_output=all for tests; errors-only keeps passing tests
+-- silent and shows the log of the failing ones.
+local quiet_test_flags = '--test_output=errors --test_summary=terse'
+
+local function bazel_term(subcommand, extra)
+  local package = vim.fn.fnameescape(vim.fn.expand '%:h') .. '/...'
+  -- The echoed label leaves out quiet_flags: they only change what is
+  -- printed, and without them the line fits the panel and can be re-run as is.
+  require('buildterm').run(('bazel %s %s %s %s'):format(subcommand, quiet_flags, extra or '', package), {
+    label = ('bazel %s %s%s'):format(subcommand, extra and extra .. ' ' or '', package),
+  })
+end
+
 vim.keymap.set('n', '<leader>bb', function()
+  bazel_term 'build'
+end, { buffer = true, desc = 'Bazel-build current package (terminal)' })
+
+vim.keymap.set('n', '<leader>bt', function()
+  bazel_term('test', quiet_test_flags)
+end, { buffer = true, desc = 'Bazel-test current package (terminal)' })
+
+vim.keymap.set('n', '<leader>bB', function()
   bazel_quickfix 'build'
 end, { buffer = true, desc = 'Bazel-build current package into quickfix' })
 
-vim.keymap.set('n', '<leader>bt', function()
+vim.keymap.set('n', '<leader>bT', function()
   bazel_quickfix 'test'
 end, { buffer = true, desc = 'Bazel-test current package into quickfix' })

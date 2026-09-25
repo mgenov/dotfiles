@@ -50,6 +50,10 @@ function M.setup(opts)
     vim.cmd { cmd = smods.vertical and 'split' or 'edit', args = { path }, mods = smods }
   end
 
+  vim.api.nvim_create_user_command('Home', function(o)
+    open(vault .. '/home.md', o.smods)
+  end, { nargs = '?', desc = 'Open home note' })
+
   vim.api.nvim_create_user_command('Daily', function(o)
     local name = os.date '%Y-%m-%d'
     if o.args ~= '' then
@@ -61,7 +65,9 @@ function M.setup(opts)
   vim.api.nvim_create_user_command('Concept', function(o)
     open(vault .. '/concepts/' .. o.args:gsub('%s+', '-') .. '.md', o.smods)
   end, { nargs = 1, desc = 'Open a concept note' })
+  
 
+  vim.keymap.set('n', '<leader>nh', '<cmd>vertical Home<CR>', { desc = "[N]otes: [H]Home (vsplit)" })
   vim.keymap.set('n', '<leader>nd', '<cmd>vertical Daily<CR>', { desc = "[N]otes: today's [D]aily (vsplit)" })
   vim.keymap.set('n', '<leader>nc', ':vertical Concept ', { desc = '[N]otes: [C]oncept (vsplit)' })
 end

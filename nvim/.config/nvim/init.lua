@@ -118,6 +118,27 @@ vim.keymap.set('n', '<leader>w', '<cmd>write<CR>', { desc = '[W]rite buffer' })
 vim.keymap.set({ 'n', 'i', 'x' }, '<C-s>', '<cmd>write<CR>', { desc = 'Save buffer' })
 vim.keymap.set("x", "<leader>p", [["_dP]])
 
+-- Copy the current file's path to the system clipboard for pasting into other
+-- apps (chat, terminal, agents). The `path:line` forms match what compilers
+-- and most tools accept as a location.
+local function copy_path(text)
+  vim.fn.setreg('+', text)
+  vim.notify('Copied ' .. text)
+end
+vim.keymap.set('n', '<leader>yp', function() copy_path(vim.fn.expand '%:.') end, { desc = '[Y]ank relative [p]ath' })
+vim.keymap.set('n', '<leader>yP', function() copy_path(vim.fn.expand '%:p') end, { desc = '[Y]ank absolute [P]ath' })
+vim.keymap.set('n', '<leader>yf', function() copy_path(vim.fn.expand '%:t') end, { desc = '[Y]ank [f]ile name' })
+vim.keymap.set('n', '<leader>yl', function()
+  copy_path(('%s:%d'):format(vim.fn.expand '%:.', vim.fn.line '.'))
+end, { desc = '[Y]ank path:[l]ine' })
+vim.keymap.set('x', '<leader>yl', function()
+  local first, last = vim.fn.line 'v', vim.fn.line '.'
+  if first > last then
+    first, last = last, first
+  end
+  copy_path(('%s:%d-%d'):format(vim.fn.expand '%:.', first, last))
+end, { desc = '[Y]ank path:[l]ine range' })
+
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
 -- is not what someone will guess without a bit more experience.
@@ -1090,7 +1111,7 @@ require('lazy').setup({
     -- [[ Configure Treesitter ]] See `:help nvim-treesitter-intro`
     config = function()
       -- ensure basic parser are installed
-      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go', 'gomod', 'gowork', 'gosum', 'starlark', 'proto', 'yaml' }
+      local parsers = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc', 'go', 'gomod', 'gowork', 'gosum', 'starlark', 'proto', 'yaml'}
       require('nvim-treesitter').install(parsers)
 
       ---@param buf integer
