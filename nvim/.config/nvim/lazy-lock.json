@@ -1,4 +1,5 @@
 {
+  "IEC.vim": { "branch": "master", "commit": "921a7ad417b1cf2edcf9951de5faec4abd630d76" },
   "LuaSnip": { "branch": "master", "commit": "642b0c595e11608b4c18219e93b88d7637af27bc" },
   "async.nvim": { "branch": "main", "commit": "46adf61a022d5c923f981d527443f406e7d0f63e" },
   "blink.cmp": { "branch": "main", "commit": "78336bc89ee5365633bcf754d93df01678b5c08f" },
