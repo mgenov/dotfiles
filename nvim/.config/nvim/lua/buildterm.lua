@@ -22,6 +22,9 @@ function M.run(cmd, opts)
   -- hold a fresh empty buffer rather than the source file.
   vim.cmd(('botright %dnew'):format(height))
   vim.fn.jobstart(wrapped, { term = true })
+  -- Closing the window would otherwise leave a hidden term:// buffer behind
+  -- for every build. Wiping also stops a build that is still running.
+  vim.bo.bufhidden = 'wipe'
   vim.cmd 'normal! G'
   vim.keymap.set('n', 'q', '<cmd>close<CR>', { buffer = true, desc = 'Close build output' })
 end
