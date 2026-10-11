@@ -11,6 +11,7 @@ local height = 12
 -- flags. Without it only the command's own output is shown.
 -- opts.status = false drops the OK/FAILED line, for tools whose own output
 -- already makes the result obvious.
+-- opts.cwd runs the command from that directory instead of nvim's cwd.
 function M.run(cmd, opts)
   opts = opts or {}
   local header = opts.label and ([[printf '\033[2m$ %%s\033[0m\n' %s; ]]):format(vim.fn.shellescape(opts.label)) or ''
@@ -21,7 +22,7 @@ function M.run(cmd, opts)
   -- jobstart turns the current buffer into the terminal, so the split must
   -- hold a fresh empty buffer rather than the source file.
   vim.cmd(('botright %dnew'):format(height))
-  vim.fn.jobstart(wrapped, { term = true })
+  vim.fn.jobstart(wrapped, { term = true, cwd = opts.cwd })
   -- Closing the window would otherwise leave a hidden term:// buffer behind
   -- for every build. Wiping also stops a build that is still running.
   vim.bo.bufhidden = 'wipe'

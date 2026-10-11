@@ -1,5 +1,5 @@
 -- Compile the surrounding Bazel package(s) into the quickfix list.
--- %:h expands at :make time to the current file's directory relative to
+-- For plain :make, %:h expands to the current file's directory relative to
 -- nvim's cwd, so from the repo root this builds e.g.
 -- apps/x/services/y/go/internal/handlers/... — narrow analysis + warm
 -- cache keeps it fast, unlike a whole-repo //... build.
@@ -18,11 +18,28 @@ vim.opt_local.errorformat = table.concat({
   [[%-G%.%#]],
 }, ',')
 
+-- Returns the Bazel workspace root and the current file's package path
+-- relative to it. %:h can't be used for the package: a buffer opened by an
+-- absolute path (pickers, jumps) keeps that absolute name, and bazel rejects
+-- package names starting with '/'.
+local function bazel_package()
+  local package_dir = vim.fn.expand '%:p:h'
+  local root = vim.fs.root(package_dir, { 'MODULE.bazel', 'WORKSPACE', 'WORKSPACE.bazel' })
+  if not root then
+    error('not inside a Bazel workspace: ' .. package_dir, 0)
+  end
+  local rel = vim.fs.relpath(root, package_dir)
+  -- Absolute label, so it reads the same as one typed by hand; a file at the
+  -- workspace root is the root package, `//...`.
+  return root, '//' .. (rel == '.' and '' or rel .. '/') .. '...'
+end
+
 local function bazel_quickfix(subcommand)
   local makeprg = vim.opt_local.makeprg:get()
   local package_dir = vim.fn.expand '%:p:h'
   local command_cwd = vim.fs.normalize(vim.fn.getcwd())
-  vim.opt_local.makeprg = ('bazel %s --color=no --curses=no %%:h/...'):format(subcommand)
+  local _, package = bazel_package()
+  vim.opt_local.makeprg = ('bazel %s --color=no --curses=no %s'):format(subcommand, package)
 
   local ok, err = pcall(vim.cmd, 'silent make!')
   vim.opt_local.makeprg = makeprg
@@ -90,11 +107,13 @@ local quiet_flags = table.concat({
 local quiet_test_flags = '--test_output=errors --test_summary=terse'
 
 local function bazel_term(subcommand, extra)
-  local package = vim.fn.fnameescape(vim.fn.expand '%:h') .. '/...'
+  local root, package = bazel_package()
   -- The echoed label leaves out quiet_flags: they only change what is
-  -- printed, and without them the line fits the panel and can be re-run as is.
+  -- printed, and without them the line fits the panel and can be re-run as is
+  -- from the workspace root.
   require('buildterm').run(('bazel %s %s %s %s'):format(subcommand, quiet_flags, extra or '', package), {
     label = ('bazel %s %s%s'):format(subcommand, extra and extra .. ' ' or '', package),
+    cwd = root,
   })
 end
 
