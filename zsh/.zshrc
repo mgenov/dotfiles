@@ -85,13 +85,20 @@ jj_prompt_info() {
   fi
 
   local -a seg=($cid $pos $cflags)
-  echo "%{$fg[green]%}[%{$fg[cyan]%}${(j: :)${seg:#}}%{$fg[green]%}]%{$reset_color%}"
+  echo "%F{8}[%F{magenta}${(j: :)${seg:#}}%F{8}]%f"
 }
 
-# Plain-git repos keep the stock oh-my-zsh segment.
+# Plain-git repos fall back to oh-my-zsh's segment, recolored to match.
 jj_or_git_prompt_info() { jj_prompt_info || git_prompt_info }
+ZSH_THEME_GIT_PROMPT_PREFIX="%F{8}[%F{magenta}"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%f"
+ZSH_THEME_GIT_PROMPT_DIRTY="%F{8}] %F{yellow}⚡%f"
+ZSH_THEME_GIT_PROMPT_CLEAN="%F{8}]"
 
-PROMPT='%{$fg_bold[cyan]%}$ZSH_THEME_CLOUD_PREFIX %{$fg_bold[green]%}%p %{$fg[green]%}%c %{$fg_bold[cyan]%}$(jj_or_git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}'
+# ANSI color names rather than hex, so the prompt follows kitty's theme. Roles
+# mirror the tmux bar: blue for location, grey for punctuation, and magenta
+# for the change id (the color jj itself uses for change ids).
+PROMPT='%F{8}$ZSH_THEME_CLOUD_PREFIX%f %B%F{blue}%c%f%b $(jj_or_git_prompt_info) '
 
 autoload -U compinit
 compinit

@@ -498,6 +498,11 @@ require('lazy').setup({
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
+      -- Moving through the list applies each scheme live; <Esc> restores the
+      -- original, <CR> keeps the highlighted one for this session only.
+      vim.keymap.set('n', '<leader>tc', function()
+        builtin.colorscheme { enable_preview = true, ignore_builtins = true }
+      end, { desc = '[T]ry [C]olorscheme' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
       vim.keymap.set('n', '<leader>ss', builtin.builtin, { desc = '[S]earch [S]elect Telescope' })
@@ -1055,16 +1060,20 @@ require('lazy').setup({
     -- change the command in the config to whatever the name of that colorscheme is.
     --
     -- If you want to see what colorschemes are already installed, you can use `:Telescope colorscheme`.
-    'folke/tokyonight.nvim',
+    -- kitty (themes/catppuccin_macchiato.conf) and tmux use the same palette;
+    -- switch all three together. Other candidates live in
+    -- custom/plugins/colorschemes.lua.
+    'catppuccin/nvim',
+    name = 'catppuccin',
     priority = 1000, -- Make sure to load this before all the other start plugins.
     config = function()
-      require('tokyonight').setup {
-        style = 'moon',
-        styles = {
-          comments = { italic = false },
-        },
+      require('catppuccin').setup {
+        flavour = 'macchiato',
+        styles = { comments = {} }, -- upright comments; the default is italic
       }
-      vim.cmd.colorscheme 'tokyonight-moon'
+      -- colors/classic-macchiato.lua: catppuccin with Vim's classic syntax
+      -- coloring. `:colorscheme catppuccin-macchiato` shows the stock one.
+      vim.cmd.colorscheme 'classic-macchiato'
     end,
   },
 
