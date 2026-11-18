@@ -1,5 +1,6 @@
 -- snacks.nvim, enabled only for its GitHub integration (`gh`) and the picker
--- that drives it. Requires an authenticated `gh` CLI.
+-- that drives it, plus bufdelete for closing buffers without collapsing the
+-- window layout. `gh` requires an authenticated `gh` CLI.
 --
 -- Telescope remains the main picker, so ui_select is off to leave
 -- vim.ui.select to telescope-ui-select.
@@ -18,5 +19,8 @@ return {
     { '<leader>gI', function() Snacks.picker.gh_issue { state = 'all' } end, desc = 'GitHub [I]ssues (all)' },
     { '<leader>gp', function() Snacks.picker.gh_pr() end, desc = 'GitHub [P]ull requests (open)' },
     { '<leader>gP', function() Snacks.picker.gh_pr { state = 'all' } end, desc = 'GitHub [P]ull requests (all)' },
+    -- Unlike :bd, these keep the window open and show another buffer in it.
+    { '<leader>d', function() Snacks.bufdelete() end, desc = 'Close buffer' },
+    { '<leader>D', function() Snacks.bufdelete.other() end, desc = 'Close all other buffers' },
   },
 }

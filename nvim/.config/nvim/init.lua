@@ -114,6 +114,31 @@ vim.diagnostic.config {
 }
 
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setqflist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- Step through the quickfix list (grep hits, references, diagnostics) with
+-- base-layer keys; the built-in ]q / [q need the Corne's symbol layer. In
+-- normal mode <C-n>/<C-p> only duplicate j/k, so nothing useful is lost.
+-- At either end the list wraps around instead of stopping with E553.
+local function qf_step(step_cmd, wrap_cmd)
+  return function()
+    local ok, err = pcall(vim.cmd, step_cmd)
+    if ok then return end
+    if err:match 'E553' then
+      vim.cmd(wrap_cmd)
+    else
+      vim.notify((err:gsub('^.-E%d+: ', '')), vim.log.levels.WARN)
+    end
+  end
+end
+vim.keymap.set('n', '<C-n>', qf_step('cnext', 'cfirst'), { desc = 'Next quickfix item' })
+vim.keymap.set('n', '<C-p>', qf_step('cprev', 'clast'), { desc = 'Previous quickfix item' })
+vim.keymap.set('n', '<leader>Q', function()
+  if vim.fn.getqflist({ winid = 0 }).winid ~= 0 then
+    vim.cmd.cclose()
+  else
+    vim.cmd.copen()
+  end
+end, { desc = 'Toggle [Q]uickfix window' })
 vim.keymap.set('n', '<leader>w', '<cmd>write<CR>', { desc = '[W]rite buffer' })
 vim.keymap.set({ 'n', 'i', 'x' }, '<C-s>', '<cmd>write<CR>', { desc = 'Save buffer' })
 vim.keymap.set("x", "<leader>p", [["_dP]])
