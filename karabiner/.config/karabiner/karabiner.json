@@ -284,7 +284,7 @@
                         ]
                     },
                     {
-                        "description": "Hyper Key Window Management (sublayer: ;)",
+                        "description": "Hyper Key Window Management (sublayer: w)",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -294,9 +294,9 @@
                                         "value": 1
                                     }
                                 ],
-                                "description": "Toggle Hyper sublayer ;",
+                                "description": "Toggle Hyper sublayer w",
                                 "from": {
-                                    "key_code": "semicolon",
+                                    "key_code": "w",
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [
@@ -501,7 +501,7 @@
                         ]
                     },
                     {
-                        "description": "Hyper Key Screenshot (p) -> region to clipboard",
+                        "description": "Hyper Key Screenshot (g) -> region to clipboard",
                         "manipulators": [
                             {
                                 "conditions": [
@@ -511,9 +511,9 @@
                                         "value": 1
                                     }
                                 ],
-                                "description": "Hyper + p -> Cmd+Ctrl+Shift+4 (region screenshot to clipboard)",
+                                "description": "Hyper + g -> Cmd+Ctrl+Shift+4 (region screenshot to clipboard)",
                                 "from": {
-                                    "key_code": "p",
+                                    "key_code": "g",
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [
@@ -820,9 +820,9 @@
                                         "value": 1
                                     }
                                 ],
-                                "description": "Mouse: Precision mode (; held -> 0.3x speed)",
+                                "description": "Mouse: Precision mode (e held -> 0.3x speed)",
                                 "from": {
-                                    "key_code": "semicolon",
+                                    "key_code": "e",
                                     "modifiers": { "optional": ["any"] }
                                 },
                                 "to": [{ "mouse_key": { "speed_multiplier": 0.3 } }],
