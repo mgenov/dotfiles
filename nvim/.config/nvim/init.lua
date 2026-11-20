@@ -817,6 +817,7 @@ require('lazy').setup({
         marksman = {},
 
         stylua = {}, -- Used to format Lua code
+        templ = {}, -- templ language server
 
         -- Special Lua Config, as recommended by neovim help docs
         lua_ls = {

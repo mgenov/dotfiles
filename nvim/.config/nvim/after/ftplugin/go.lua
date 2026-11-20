@@ -97,32 +97,49 @@ local quiet_flags = table.concat({
   '--curses=no',
   '--color=yes',
   '--noshow_progress',
-  '--ui_event_filters=-info,-debug,-warning',
   '--show_result=0',
   '--noannounce_rc',
 }, ' ')
+
+local quiet_build_filter = '--ui_event_filters=-info,-debug,-warning'
 
 -- .bazelrc sets --test_output=all for tests; errors-only keeps passing tests
 -- silent and shows the log of the failing ones.
 local quiet_test_flags = '--test_output=errors --test_summary=terse'
 
-local function bazel_term(subcommand, extra)
+-- Bazel attaches a failing test's log to an `INFO: From Testing //...:`
+-- event, so tests can't filter INFO out like builds do — the log would vanish
+-- and only the FAIL line would remain. Instead INFO is kept and the plain
+-- INFO lines (invocation id, analysis, elapsed time, ...) are dropped here,
+-- keeping only the `INFO: From` ones that carry action output. The optional
+-- escape sequences match the colour codes that --color=yes wraps the prefix
+-- in; anchoring at line start leaves `INFO:` lines inside test logs alone.
+local quiet_test_filter = [[--ui_event_filters=-debug,-warning 2>&1 ]]
+  .. [[| awk '/^(\033\[[0-9;]*m)*INFO: (\033\[0m)?From / || !/^(\033\[[0-9;]*m)*INFO: /']]
+
+-- `filter` is appended after the package; it is either more event-filter
+-- flags, or flags followed by a shell pipe, and is kept out of the label.
+local function bazel_term(subcommand, extra, filter)
   local root, package = bazel_package()
   -- The echoed label leaves out quiet_flags: they only change what is
   -- printed, and without them the line fits the panel and can be re-run as is
   -- from the workspace root.
-  require('buildterm').run(('bazel %s %s %s %s'):format(subcommand, quiet_flags, extra or '', package), {
-    label = ('bazel %s %s%s'):format(subcommand, extra and extra .. ' ' or '', package),
-    cwd = root,
-  })
+  -- pipefail makes a filtered command report bazel's exit status, not awk's.
+  require('buildterm').run(
+    ('set -o pipefail; bazel %s %s %s %s %s'):format(subcommand, quiet_flags, extra or '', package, filter),
+    {
+      label = ('bazel %s %s%s'):format(subcommand, extra and extra .. ' ' or '', package),
+      cwd = root,
+    }
+  )
 end
 
 vim.keymap.set('n', '<leader>bb', function()
-  bazel_term 'build'
+  bazel_term('build', nil, quiet_build_filter)
 end, { buffer = true, desc = 'Bazel-build current package (terminal)' })
 
 vim.keymap.set('n', '<leader>bt', function()
-  bazel_term('test', quiet_test_flags)
+  bazel_term('test', quiet_test_flags, quiet_test_filter)
 end, { buffer = true, desc = 'Bazel-test current package (terminal)' })
 
 vim.keymap.set('n', '<leader>bB', function()
