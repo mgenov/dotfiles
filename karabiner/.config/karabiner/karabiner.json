@@ -72,7 +72,7 @@
                                 "to": [
                                     {
                                         "software_function": {
-                                            "open_application": { "bundle_identifier": "net.kovidgoyal.kitty" }
+                                            "open_application": { "bundle_identifier": "com.superlogical.rex" }
                                         },
                                         "repeat": false
                                     }
@@ -490,12 +490,12 @@
                                         "value": 1
                                     }
                                 ],
-                                "description": "Focus kitty + open tmux project picker",
+                                "description": "Focus Rex + open its project picker",
                                 "from": {
                                     "key_code": "t",
                                     "modifiers": { "optional": ["any"] }
                                 },
-                                "to": [{ "shell_command": "/Users/mgenov/bin/tm-switch" }],
+                                "to": [{ "shell_command": "/Users/mgenov/bin/rex-switch" }],
                                 "type": "basic"
                             }
                         ]

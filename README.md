@@ -13,6 +13,7 @@ Each top-level directory is a stow package. Its contents mirror the target paths
 | `helix`   | `~/.config/helix/`                                    |
 | `nvim`    | `~/.config/nvim/`                                     |
 | `tmux`    | `~/.config/tmux/`                                     |
+| `rex`     | `~/.config/rex/`                                      |
 | `yazi`    | `~/.config/yazi/`                                     |
 | `karabiner`| `~/.config/karabiner/` (macOS only)                  |
 | `yabai`   | `~/.config/yabai/` (macOS only)                       |
@@ -32,7 +33,7 @@ git clone <REMOTE_URL> ~/dotfiles
 cd ~/dotfiles
 
 # 3. stow everything (most packages target $HOME via .config)
-stow alacritty kitty helix nvim tmux yazi bin karabiner yabai
+stow alacritty kitty helix nvim tmux rex yazi bin karabiner yabai
 
 # 4. packages that live directly under $HOME need an explicit target
 stow --target="$HOME" lazygit zsh bazel
@@ -80,6 +81,7 @@ Guarded by `zsh/.zshrc.local` in `.gitignore` as a safety net.
 - **Helix** — previous modal editor config kept around
 - **Neovim** — current modal editor config with built-in LSP and Go/Bazel shortcuts
 - **tmux** — terminal multiplexer; `prefix` is `C-a`, `prefix f` runs `tmux-sessionizer`
+- **Rex** — terminal multiplexer on trial; no prefix, `cmd+shift+o` opens the project picker
 - **Yazi** — file manager, opens files in the running Neovim instance
 - **LazyGit** — standalone Git TUI
 

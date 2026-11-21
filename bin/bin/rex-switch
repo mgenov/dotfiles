@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# rex-switch — Karabiner-callable. Focus Rex and present its project picker.
+#
+# Karabiner runs shell commands with a bare environment, so the rex binary is
+# named by its full path; Rex only puts it on PATH inside its own terminals.
+
+set -e
+
+REX="$HOME/Library/Application Support/com.superlogical.rex/RexServer/Versions/Current/Rex Server.app/Contents/MacOS/rex"
+
+# Launches Rex when it is not running, and brings it forward otherwise.
+open -a Rex
+
+# `rex do` blocks until the picker is answered; the timeout dismisses a picker
+# that was left open instead of leaving this process waiting forever.
+exec "$REX" --timeout 2m do sessionizer
