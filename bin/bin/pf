@@ -1,5 +1,5 @@
 #!/usr/bin/env zsh
-# pf — open kubectl port-forward panes in a new tmux window.
+# pf — open kubectl port-forward panes in a new Rex tab or tmux window.
 #
 # Usage:
 #   pf svc/billing:8080                          # default namespace
@@ -21,8 +21,15 @@ set -e
 
 export PATH="$HOME/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
 
-if [[ -z "$TMUX" ]]; then
-  echo "pf: must be run from inside a tmux session" >&2
+# tmux wins when both are set: a tmux running inside a Rex pane is the
+# multiplexer the user is actually looking at.
+local mux
+if [[ -n "$TMUX" ]]; then
+  mux=tmux
+elif [[ -n "$REX_SESSION" ]]; then
+  mux=rex
+else
+  echo "pf: must be run from inside a Rex or tmux session" >&2
   exit 1
 fi
 
@@ -69,28 +76,68 @@ _pf_parse() {
   echo "$ns_flag $resource $port"
 }
 
-# Create a new window — initial pane becomes the shell (left side)
-local shell_pane
-shell_pane="$(tmux new-window -n "pf" -c "$PWD" -P -F '#{pane_id}')"
+# Each forward is typed into an interactive shell rather than run as the pane's
+# own command, so a dropped forward can be restarted from that pane's history
+# and kubectl is found on the PATH the interactive shell sets up.
 
-# First port-forward: split right (creates the right column)
-local prev_pane
-prev_pane="$(tmux split-window -h -t "$shell_pane" -P -F '#{pane_id}')"
-local parsed
-parsed="$(_pf_parse "$1")"
-tmux send-keys -t "$prev_pane" "kubectl port-forward$global_flags $parsed" Enter
-shift
+_pf_tmux() {
+  # Create a new window — initial pane becomes the shell (left side)
+  local shell_pane
+  shell_pane="$(tmux new-window -n "pf" -c "$PWD" -P -F '#{pane_id}')"
 
-# Remaining port-forwards: stack downward in the right column
-for target in "$@"; do
-  prev_pane="$(tmux split-window -v -t "$prev_pane" -P -F '#{pane_id}')"
-  parsed="$(_pf_parse "$target")"
+  # First port-forward: split right (creates the right column)
+  local prev_pane
+  prev_pane="$(tmux split-window -h -t "$shell_pane" -P -F '#{pane_id}')"
+  local parsed
+  parsed="$(_pf_parse "$1")"
   tmux send-keys -t "$prev_pane" "kubectl port-forward$global_flags $parsed" Enter
-done
+  shift
 
-# Shell pane = 80% width, right column = 20% with port-forwards stacked evenly
-tmux set-window-option -t "$shell_pane" main-pane-width "80%"
-tmux select-layout -t "$shell_pane" main-vertical 2>/dev/null || true
+  # Remaining port-forwards: stack downward in the right column
+  for target in "$@"; do
+    prev_pane="$(tmux split-window -v -t "$prev_pane" -P -F '#{pane_id}')"
+    parsed="$(_pf_parse "$target")"
+    tmux send-keys -t "$prev_pane" "kubectl port-forward$global_flags $parsed" Enter
+  done
 
-# Focus back to the shell pane (left side)
-tmux select-pane -t "$shell_pane"
+  # Shell pane = 80% width, right column = 20% with port-forwards stacked evenly
+  tmux set-window-option -t "$shell_pane" main-pane-width "80%"
+  tmux select-layout -t "$shell_pane" main-vertical 2>/dev/null || true
+
+  # Focus back to the shell pane (left side)
+  tmux select-pane -t "$shell_pane"
+}
+
+_pf_rex() {
+  local session="$REX_SESSION"
+
+  # New tab — its initial pane becomes the shell (left side)
+  local shell_pane
+  shell_pane="$(rex window new -s "$session" pf -c "$PWD" --json | jq -er '.block_ids[0]')"
+
+  local total=$# remaining=$# prev_pane="$shell_pane" target parsed
+  for target in "$@"; do
+    if [[ "$prev_pane" == "$shell_pane" ]]; then
+      # First port-forward: a 20% column on the right
+      prev_pane="$(rex split -s "$session" -b "$shell_pane" --split=right --ratio 20 \
+        -c "$PWD" --label "$target" --focus=false --json | jq -er '.block_ids[0]')"
+    else
+      # Each later pane is carved from the bottom of the previous one. Taking
+      # remaining/(remaining+1) of it leaves every pane in the column the
+      # same height once the last one is placed.
+      prev_pane="$(rex split -s "$session" -b "$prev_pane" --split=below \
+        --ratio $(( remaining * 100 / (remaining + 1) )) \
+        -c "$PWD" --label "$target" --focus=false --json | jq -er '.block_ids[0]')"
+    fi
+    remaining=$(( remaining - 1 ))
+
+    parsed="$(_pf_parse "$target")"
+    rex send -s "$session" -b "$prev_pane" "kubectl port-forward$global_flags $parsed"
+    rex send-key -s "$session" -b "$prev_pane" enter
+  done
+
+  # Focus back to the shell pane (left side)
+  rex focus -s "$session" "$shell_pane"
+}
+
+"_pf_$mux" "$@"
